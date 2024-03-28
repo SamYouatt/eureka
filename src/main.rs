@@ -1,13 +1,15 @@
 use std::sync::{Arc, Mutex};
 
 use askama_axum::Template;
-use axum::{extract::State, response::IntoResponse, routing::{get, post}, Router};
+use axum::{
+    routing::{get, post},
+    Router,
+};
+use domain::idea::Idea;
+use features::{create_idea::handler::create_idea, idea_list::handler::get_ideas};
 
-#[derive(Template)]
-#[template(path = "index.html")]
-struct IndexTemplate {
-    ideas: Vec<Idea>
-}
+mod features;
+mod domain;
 
 #[derive(Template)]
 #[template(path = "idea-card.html")]
@@ -18,24 +20,15 @@ struct IdeaCard {
 
 impl IdeaCard {
     pub fn from_idea(idea: Idea) -> IdeaCard {
-        IdeaCard { title: idea.title, tagline: idea.tagline }
+        IdeaCard {
+            title: idea.title,
+            tagline: idea.tagline,
+        }
     }
 }
 
 #[derive(Clone)]
-struct Idea {
-    title: String,
-    tagline: String,
-}
-
-impl Idea {
-    pub fn new(title: &str, tagline: &str) -> Idea {
-        Idea { title: title.to_string(), tagline: tagline.to_string() } 
-    }
-}
-
-#[derive(Clone)]
-struct AppState {
+pub struct AppState {
     ideas: Arc<Mutex<Vec<Idea>>>,
 }
 
@@ -46,27 +39,19 @@ async fn main() {
     let ideas = Arc::new(Mutex::new(vec![]));
     ideas.lock().unwrap().push(seed_idea);
 
-    let state = AppState { ideas: ideas.clone() };
+    let state = AppState {
+        ideas: ideas.clone(),
+    };
 
     let app = Router::new()
         .route("/", get(get_ideas))
-        .route("/", post(post_idea))
+        .route("/", post(create_idea))
         .with_state(state);
 
-    let listener = tokio::net::TcpListener::bind("0.0.0.0:42069").await.unwrap();
+    let listener = tokio::net::TcpListener::bind("0.0.0.0:42069")
+        .await
+        .unwrap();
+
     axum::serve(listener, app).await.unwrap();
 }
 
-async fn get_ideas(State(state): State<AppState>) -> impl IntoResponse {
-    let ideas = state.ideas.lock().unwrap().to_vec();
-
-    IndexTemplate { ideas }
-}
-
-async fn post_idea(State(state): State<AppState>) -> impl IntoResponse {
-    let new_idea = Idea::new("Random", "cool");
-
-    state.ideas.lock().unwrap().push(new_idea.clone());
-    
-    IdeaCard::from_idea(new_idea)
-}
