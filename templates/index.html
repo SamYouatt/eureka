@@ -1,0 +1,16 @@
+{% import "idea-card-macro.html" as card %}
+{% extends "base.html" %}
+
+{% block content %}
+<h1>No longer PlantX</h1>
+<hr/>
+<h2>Ideas:</h2>
+<button hx-post="" hx-target="#ideas_list" hx-swap="beforeend">New idea</button>
+<div id="ideas_list">
+{% for idea in ideas %}
+    {% call card::idea_card(idea.title, idea.tagline) %}
+{% else %}
+    <p>No ideas yet sad</p>
+{% endfor %}
+</div>
+{% endblock %}
