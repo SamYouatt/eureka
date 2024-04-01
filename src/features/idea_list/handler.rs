@@ -1,17 +1,22 @@
-use askama::Template;
-use askama_axum::IntoResponse;
 use axum::extract::State;
+use maud::{html, Markup};
 
-use crate::{AppState, Idea};
+use crate::{domain::page::page, AppState, Idea};
 
-#[derive(Template)]
-#[template(path = "index.html")]
-struct IndexTemplate {
-    ideas: Vec<Idea>
+fn ideas_list(ideas: &[Idea]) -> Markup {
+    html! {
+        button hx-post="" hx-target="#ideas_list" hx-swap="beforeend"
+            { "New idea" }
+        div #ideas_list {
+            @for idea in ideas {
+                (idea.card_markup())
+            }
+        }
+    }
 }
 
-pub async fn get_ideas(State(state): State<AppState>) -> impl IntoResponse {
+pub async fn get_ideas(State(state): State<AppState>) -> Markup {
     let ideas = state.ideas.lock().unwrap().to_vec();
 
-    IndexTemplate { ideas }
+    page(ideas_list(&ideas))
 }

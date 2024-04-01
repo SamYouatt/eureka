@@ -1,6 +1,5 @@
 use std::sync::{Arc, Mutex};
 
-use askama_axum::Template;
 use axum::{
     routing::{get, post},
     Router,
@@ -10,22 +9,6 @@ use features::{create_idea::handler::create_idea, idea_list::handler::get_ideas}
 
 mod features;
 mod domain;
-
-#[derive(Template)]
-#[template(path = "idea-card.html")]
-struct IdeaCard {
-    title: String,
-    tagline: String,
-}
-
-impl IdeaCard {
-    pub fn from_idea(idea: Idea) -> IdeaCard {
-        IdeaCard {
-            title: idea.title,
-            tagline: idea.tagline,
-        }
-    }
-}
 
 #[derive(Clone)]
 pub struct AppState {
