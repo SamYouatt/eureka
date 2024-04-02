@@ -1,11 +1,11 @@
 use std::sync::{Arc, Mutex};
 
 use axum::{
-    routing::{get, post},
+    routing::get,
     Router,
 };
 use domain::idea::Idea;
-use features::{create_idea::handler::create_idea, idea_list::handler::get_ideas};
+use features::{create_idea::handler::{create_idea, create_idea_page}, idea_list::handler::get_ideas};
 
 mod features;
 mod domain;
@@ -28,7 +28,7 @@ async fn main() {
 
     let app = Router::new()
         .route("/", get(get_ideas))
-        .route("/", post(create_idea))
+        .route("/ideas/new", get(create_idea_page).post(create_idea))
         .with_state(state);
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:42069")

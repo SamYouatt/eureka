@@ -1,4 +1,4 @@
-use axum::extract::State;
+use axum::{extract::State, response::IntoResponse};
 use maud::{html, Markup};
 
 use crate::{domain::page::page, AppState, Idea};
@@ -15,7 +15,7 @@ fn ideas_list(ideas: &[Idea]) -> Markup {
     }
 }
 
-pub async fn get_ideas(State(state): State<AppState>) -> Markup {
+pub async fn get_ideas(State(state): State<AppState>) -> impl IntoResponse {
     let ideas = state.ideas.lock().unwrap().to_vec();
 
     page(ideas_list(&ideas))
