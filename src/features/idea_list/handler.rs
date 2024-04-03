@@ -6,7 +6,7 @@ use crate::{domain::page::page, AppState, Idea};
 fn ideas_list(ideas: &[Idea]) -> Markup {
     html! {
         a href="/ideas/new" { "New idea" }
-        div #ideas_list {
+        div #ideas_list class="text-indigo-500" {
             @for idea in ideas {
                 (idea.card_markup())
             }
