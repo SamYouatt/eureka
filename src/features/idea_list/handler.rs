@@ -5,8 +5,7 @@ use crate::{domain::page::page, AppState, Idea};
 
 fn ideas_list(ideas: &[Idea]) -> Markup {
     html! {
-        button hx-post="" hx-target="#ideas_list" hx-swap="beforeend"
-            { "New idea" }
+        a href="/ideas/new" { "New idea" }
         div #ideas_list {
             @for idea in ideas {
                 (idea.card_markup())
