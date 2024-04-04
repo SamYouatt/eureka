@@ -13,13 +13,4 @@ impl Idea {
             tagline: tagline.to_string(),
         }
     }
-
-    pub fn card_markup(&self) -> Markup {
-        html! {
-            div {
-                h2 { (self.title) }
-                p { (self.tagline) }
-            }
-        }
-    }
 }
