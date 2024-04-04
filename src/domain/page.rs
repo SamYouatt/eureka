@@ -13,7 +13,20 @@ pub fn page(content: Markup) -> Markup {
         link href="/assets/main.css" rel="stylesheet";
         link href="https://rsms.me/inter/inter.css" rel="stylesheet";
         body {
+            (navbar())
             (content)
+        }
+    }
+}
+
+fn navbar() -> Markup {
+    html! {
+        nav class="bg-gray-900 w-full z-20 border-b border-gray-600 flex flex-wrap items-center justify-between mx-auto p-4" {
+            a href="/" class="text-3xl text-indigo-500 font-bold" { "Eureka" }
+            a
+                href="/ideas/new"
+                class="bg-indigo-500 text-white hover:bg-indigo-700 focus:ring-4 focus:outline-none rounded-lg text-sm px-4 py-2 text-center"
+                { "New Idea" }
         }
     }
 }

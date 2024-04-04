@@ -4,7 +4,6 @@ use crate::domain::idea::Idea;
 
 pub fn ideas_list(ideas: &[Idea]) -> Markup {
     html! {
-        a href="/ideas/new" { "New idea" }
         div #ideas_list {
             @for idea in ideas {
                 (idea_card(idea))
