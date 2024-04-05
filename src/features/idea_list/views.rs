@@ -4,8 +4,8 @@ use crate::domain::idea::Idea;
 
 pub fn ideas_list(ideas: &[Idea]) -> Markup {
     html! {
-        div class="grid grid-cols-3 overflow-auto" {
-            div #ideas_list class="overflow-auto" {
+        div class="h-full grid grid-cols-3 overflow-auto divide-x-2 divide-solid divide-gray-200" {
+            div #ideas_list class="overflow-auto divide-y divide-solid divide-gray-200" {
                 @for idea in ideas {
                     (idea_card(idea))
                 }
@@ -19,9 +19,9 @@ pub fn ideas_list(ideas: &[Idea]) -> Markup {
 
 fn idea_card(idea: &Idea) -> Markup {
     html! {
-        div class="flex flex-col p-4 max-w-sm mx-auto rounded-lg shadow-lg space-y-2" {
-            h2 class="text-xl text-black" { (idea.title) }
-            p class="text-slate-500" { (idea.tagline) }
+        div class="flex flex-col p-2 mx-auto hover:bg-indigo-100" {
+            h2 class="text-base text-black" { (idea.title) }
+            p class="text-sm text-slate-500" { (idea.tagline) }
         }
     }
 }
