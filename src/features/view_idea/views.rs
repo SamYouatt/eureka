@@ -2,15 +2,19 @@ use maud::{html, Markup};
 
 use crate::domain::idea::Idea;
 
-pub fn idea_pane_contents(idea: &Idea) -> Markup {
+pub fn idea_view(idea: &Idea) -> Markup {
     html! {
-        p { (idea.title) }
-        p { (idea.tagline) }
+        div class="flex flex-col h-full overflow-auto p-4 gap-4" {
+            h1 class="text-3xl" { (idea.title) }
+            h2 class="text-lg text-indigo-500" { (idea.tagline) }
+        }
     }
 }
 
 pub fn missing_idea() -> Markup {
     html! {
-        p { "Oops! Something went wrong finding your idea..." }
+        div class="flex items-center justify-center h-full" {
+            p { "Oops! Something went wrong finding your idea..." }
+        }
     }
 }

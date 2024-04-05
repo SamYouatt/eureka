@@ -1,7 +1,7 @@
 use axum::{extract::{Path, State}, response::IntoResponse};
 use uuid::Uuid;
 
-use super::views::{idea_pane_contents, missing_idea};
+use super::views::{idea_view, missing_idea};
 use crate::AppState;
 
 pub async fn get_idea(State(state): State<AppState>, Path(id): Path<String>) -> impl IntoResponse {
@@ -11,7 +11,7 @@ pub async fn get_idea(State(state): State<AppState>, Path(id): Path<String>) -> 
     };
     
     match state.ideas.lock().unwrap().iter().find(|idea| idea.id == id) {
-        Some(idea) => idea_pane_contents(&idea),
+        Some(idea) => idea_view(&idea),
         None => missing_idea(),
     }
 }

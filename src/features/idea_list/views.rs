@@ -10,8 +10,10 @@ pub fn ideas_list(ideas: &[Idea]) -> Markup {
                     (idea_card(idea))
                 }
             }
-            div #idea_pane class="col-span-2 flex justify-center items-center" {
-                p { "Idea here" }
+            div #idea_pane class="col-span-2 h-full overflow-auto" {
+                div class="flex items-center justify-center h-full" {
+                    p { "What will you think of today?" }
+                }
             }
         }
     }
