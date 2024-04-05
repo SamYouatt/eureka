@@ -1,15 +1,17 @@
-use axum::{extract::Path, response::IntoResponse};
-use maud::html;
+use axum::{extract::{Path, State}, response::IntoResponse};
 use uuid::Uuid;
 
-// /idea/{id}
-pub async fn get_idea(Path(id): Path<String>) -> impl IntoResponse {
+use super::views::{idea_pane_contents, missing_idea};
+use crate::AppState;
+
+pub async fn get_idea(State(state): State<AppState>, Path(id): Path<String>) -> impl IntoResponse {
     let id = match Uuid::parse_str(&id) {
         Ok(id) => id,
-        Err(_) => return html!{ p { "Couldn't find matching idea" } },
+        Err(_) => return missing_idea(),
     };
-
-    html! {
-        p { (id) }
+    
+    match state.ideas.lock().unwrap().iter().find(|idea| idea.id == id) {
+        Some(idea) => idea_pane_contents(&idea),
+        None => missing_idea(),
     }
 }

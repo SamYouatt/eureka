@@ -19,11 +19,13 @@ pub fn ideas_list(ideas: &[Idea]) -> Markup {
 
 fn idea_card(idea: &Idea) -> Markup {
     let route = format!("/ideas/{}", idea.id);
+    let div_id = format!("idea-{}", idea.id);
 
     html! {
-        div class="flex flex-col p-2 mx-auto hover:bg-indigo-100" hx-get=(route) hx-target="#idea_pane" {
+        div class="flex flex-col p-2 mx-auto hover:bg-indigo-100" hx-get=(route) hx-target="#idea_pane" id=(div_id) {
             h2 class="text-base text-black" { (idea.title) }
             p class="text-sm text-slate-500" { (idea.tagline) }
         }
     }
 }
+

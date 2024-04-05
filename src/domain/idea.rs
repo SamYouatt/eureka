@@ -15,4 +15,12 @@ impl Idea {
             tagline: tagline.to_string(),
         }
     }
+
+    pub fn with_id(id: Uuid, title: &str, tagline: &str) -> Self {
+        Self {
+            id,
+            title: title.to_string(),
+            tagline: tagline.to_string(),
+        }
+    }
 }
