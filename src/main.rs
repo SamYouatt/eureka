@@ -18,10 +18,7 @@ pub struct AppState {
 
 #[tokio::main]
 async fn main() {
-    let seed_idea = Idea::new("First idea", "bosh");
-
-    let ideas = Arc::new(Mutex::new(vec![]));
-    ideas.lock().unwrap().push(seed_idea);
+    let ideas = Arc::new(Mutex::new(generate_seed_data()));
 
     let state = AppState {
         ideas: ideas.clone(),
@@ -43,4 +40,30 @@ async fn main() {
         .unwrap();
 
     axum::serve(listener, app).await.unwrap();
+}
+
+fn generate_seed_data() -> Vec<Idea> {
+    let mut ideas = vec![];
+
+    ideas.push(Idea::new("Candle shop", "Electricity is overrated"));
+    ideas.push(Idea::new("Tartan paint", "Brighten up your day"));
+    ideas.push(Idea::new(
+        "Bucket with a hole",
+        "Basically a sprikler but with a handle",
+    ));
+    ideas.push(Idea::new("Candle shop", "Electricity is overrated"));
+    ideas.push(Idea::new("Candle shop", "Electricity is overrated"));
+    ideas.push(Idea::new("Tartan paint", "Brighten up your day"));
+    ideas.push(Idea::new(
+        "Bucket with a hole",
+        "Basically a sprikler but with a handle",
+    ));
+    ideas.push(Idea::new("Tartan paint", "Brighten up your day"));
+    ideas.push(Idea::new(
+        "Bucket with a hole",
+        "Basically a sprikler but with a handle",
+    ));
+    ideas.push(Idea::new("This one", "Track your ideas"));
+
+    ideas
 }

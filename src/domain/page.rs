@@ -12,7 +12,7 @@ pub fn page(content: Markup) -> Markup {
             { }
         link href="/assets/main.css" rel="stylesheet";
         link href="https://rsms.me/inter/inter.css" rel="stylesheet";
-        body {
+        body class="h-dvh flex flex-col" {
             (navbar())
             (content)
         }
@@ -21,7 +21,7 @@ pub fn page(content: Markup) -> Markup {
 
 fn navbar() -> Markup {
     html! {
-        nav class="bg-gray-900 w-full z-20 border-b border-gray-600 flex flex-wrap items-center justify-between mx-auto p-4" {
+        nav class="bg-gray-900 w-full border-b border-gray-600 flex flex-wrap items-center justify-between mx-auto p-4" {
             a href="/" class="text-3xl text-indigo-500 font-bold" { "Eureka" }
             a
                 href="/ideas/new"
