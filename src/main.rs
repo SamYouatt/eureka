@@ -3,8 +3,7 @@ use std::sync::{Arc, Mutex};
 use axum::{routing::get, Router};
 use domain::idea::Idea;
 use features::{
-    create_idea::handler::{create_idea, create_idea_page},
-    idea_list::handler::get_ideas, view_idea::handler::get_idea,
+    create_idea::handler::{create_idea, create_idea_page}, health_check::health_check, idea_list::handler::get_ideas, view_idea::handler::get_idea
 };
 use tower_http::services::ServeDir;
 
@@ -28,6 +27,7 @@ async fn main() {
 
     let app = Router::new()
         .route("/", get(get_ideas))
+        .route("/health_check", get(health_check))
         .route("/ideas/new", get(create_idea_page).post(create_idea))
         .route("/ideas/:id", get(get_idea))
         .with_state(state)
