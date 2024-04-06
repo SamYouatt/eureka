@@ -8,6 +8,7 @@ use features::{
     idea_list::handler::get_ideas,
     view_idea::handler::get_idea,
 };
+use tokio::net::TcpListener;
 use tower_http::services::ServeDir;
 
 mod domain;
@@ -18,7 +19,7 @@ pub struct AppState {
     ideas: Arc<Mutex<Vec<Idea>>>,
 }
 
-pub async fn run() -> Result<Serve<Router, Router>, std::io::Error> {
+pub async fn run(listener: TcpListener) -> Result<Serve<Router, Router>, std::io::Error> {
     let ideas = Arc::new(Mutex::new(generate_seed_data()));
 
     let state = AppState {
@@ -37,8 +38,6 @@ pub async fn run() -> Result<Serve<Router, Router>, std::io::Error> {
             "/assets",
             ServeDir::new(format!("{}/assets", assets_path.to_str().unwrap())),
         );
-
-    let listener = tokio::net::TcpListener::bind("0.0.0.0:42069").await?;
 
     Ok(axum::serve(listener, app))
 }
