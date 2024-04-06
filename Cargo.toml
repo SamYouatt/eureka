@@ -15,8 +15,10 @@ path = "src/main.rs"
 [dependencies]
 axum = { version = "0.7.4", features = ["form"] }
 maud = { version = "0.26.0", features = ["axum"] }
-reqwest = "0.12.3"
 serde = { version = "1.0.197", features = ["derive"] }
 tokio = { version = "1.36.0", features = ["macros", "rt-multi-thread"] }
 tower-http = { version = "0.5.2", features = ["fs"] }
 uuid = { version = "1.8.0", features = ["v4"] }
+
+[dev-dependencies]
+reqwest = "0.12.3"
