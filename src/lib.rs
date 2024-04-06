@@ -1,8 +1,13 @@
 use std::sync::{Arc, Mutex};
 
-use axum::{routing::get, Router};
+use axum::{routing::get, serve::Serve, Router};
 use domain::idea::Idea;
-use features::{create_idea::handler::{create_idea, create_idea_page}, health_check::health_check, idea_list::handler::get_ideas, view_idea::handler::get_idea};
+use features::{
+    create_idea::handler::{create_idea, create_idea_page},
+    health_check::health_check,
+    idea_list::handler::get_ideas,
+    view_idea::handler::get_idea,
+};
 use tower_http::services::ServeDir;
 
 mod domain;
@@ -13,7 +18,7 @@ pub struct AppState {
     ideas: Arc<Mutex<Vec<Idea>>>,
 }
 
-pub async fn run() {
+pub async fn run() -> Result<Serve<Router, Router>, std::io::Error> {
     let ideas = Arc::new(Mutex::new(generate_seed_data()));
 
     let state = AppState {
@@ -33,11 +38,9 @@ pub async fn run() {
             ServeDir::new(format!("{}/assets", assets_path.to_str().unwrap())),
         );
 
-    let listener = tokio::net::TcpListener::bind("0.0.0.0:42069")
-        .await
-        .unwrap();
+    let listener = tokio::net::TcpListener::bind("0.0.0.0:42069").await?;
 
-    axum::serve(listener, app).await.unwrap();
+    Ok(axum::serve(listener, app))
 }
 
 fn generate_seed_data() -> Vec<Idea> {
