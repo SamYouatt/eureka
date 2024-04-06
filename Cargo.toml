@@ -3,6 +3,13 @@ name = "eureka"
 version = "0.1.0"
 edition = "2021"
 
+[lib]
+path = "src/lib.rs"
+
+[[bin]]
+name = "eureka"
+path = "src/main.rs"
+
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
@@ -12,3 +19,6 @@ serde = { version = "1.0.197", features = ["derive"] }
 tokio = { version = "1.36.0", features = ["macros", "rt-multi-thread"] }
 tower-http = { version = "0.5.2", features = ["fs"] }
 uuid = { version = "1.8.0", features = ["v4"] }
+
+[dev-dependencies]
+reqwest = "0.12.3"
