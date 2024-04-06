@@ -1,4 +1,4 @@
-use eureka::run;
+use eureka::startup::run;
 use tokio::net::TcpListener;
 
 #[tokio::main]

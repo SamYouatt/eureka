@@ -1,45 +1,15 @@
 use std::sync::{Arc, Mutex};
 
-use axum::{routing::get, serve::Serve, Router};
 use domain::idea::Idea;
-use features::{
-    create_idea::handler::{create_idea, create_idea_page},
-    health_check::health_check,
-    idea_list::handler::get_ideas,
-    view_idea::handler::get_idea,
-};
-use tokio::net::TcpListener;
-use tower_http::services::ServeDir;
 
-mod domain;
-mod features;
+pub mod domain;
+pub mod features;
+pub mod configuration;
+pub mod startup;
 
 #[derive(Clone)]
 pub struct AppState {
     ideas: Arc<Mutex<Vec<Idea>>>,
-}
-
-pub async fn run(listener: TcpListener) -> Result<Serve<Router, Router>, std::io::Error> {
-    let ideas = Arc::new(Mutex::new(generate_seed_data()));
-
-    let state = AppState {
-        ideas: ideas.clone(),
-    };
-
-    let assets_path = std::env::current_dir().unwrap();
-
-    let app = Router::new()
-        .route("/", get(get_ideas))
-        .route("/health_check", get(health_check))
-        .route("/ideas/new", get(create_idea_page).post(create_idea))
-        .route("/ideas/:id", get(get_idea))
-        .with_state(state)
-        .nest_service(
-            "/assets",
-            ServeDir::new(format!("{}/assets", assets_path.to_str().unwrap())),
-        );
-
-    Ok(axum::serve(listener, app))
 }
 
 fn generate_seed_data() -> Vec<Idea> {
