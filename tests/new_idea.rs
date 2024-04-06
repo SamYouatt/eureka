@@ -1,14 +1,22 @@
-use eureka::startup::run;
+use eureka::{configuration::get_configuration, startup::run};
+use sqlx::{Connection, PgConnection};
 use tokio::net::TcpListener;
 
 #[tokio::test]
 async fn can_creat_new_idea() {
     // Arrange
-    let port = spawn_app().await;
+    let app_address = spawn_app().await;
+    let configuration = get_configuration().expect("Failed to read configuration");
+
+    let connection_string = configuration.database.connection_string();
+    let connection = PgConnection::connect(&connection_string)
+        .await
+        .expect("Failed to connect to Postgres");
+
     let client = reqwest::Client::new();
-    let url = format!("{}/ideas/new", port);
+    let url = format!("{}/ideas/new", app_address);
     
-    let body = "";
+    let body = "name=Test%20Idea&tagline=Just%20Testing";
 
     // Act
     let response = client
