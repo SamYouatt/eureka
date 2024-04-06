@@ -9,7 +9,7 @@ async fn can_creat_new_idea() {
     let configuration = get_configuration().expect("Failed to read configuration");
 
     let connection_string = configuration.database.connection_string();
-    let connection = PgConnection::connect(&connection_string)
+    let mut connection = PgConnection::connect(&connection_string)
         .await
         .expect("Failed to connect to Postgres");
 
@@ -29,6 +29,14 @@ async fn can_creat_new_idea() {
 
     // Assert
     assert!(response.status().is_success());
+
+    let created_idea = sqlx::query!("SELECT title, tagline FROM ideas")
+        .fetch_one(&mut connection)
+        .await
+        .expect("Failed to fetch saved idea");
+
+    assert_eq!(created_idea.title, "Test Idea");
+    assert_eq!(created_idea.tagline, "Just Testing");
 }
 
 async fn spawn_app() -> String {
