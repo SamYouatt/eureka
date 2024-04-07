@@ -1,4 +1,3 @@
-use domain::idea::Idea;
 use sqlx::PgPool;
 
 pub mod domain;

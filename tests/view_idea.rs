@@ -1,5 +1,4 @@
 use chrono::Utc;
-use eureka::domain::idea::Idea;
 use sqlx::types::Uuid;
 use sqlx::PgPool;
 
@@ -32,14 +31,13 @@ async fn can_view_idea() {
 }
 
 async fn seed_idea(db: &PgPool, title: &str, tagline: &str) -> Uuid {
-    let idea = Idea::new(title, tagline);
     let idea_id = Uuid::new_v4();
 
     sqlx::query!(
         "INSERT INTO ideas (id, title, tagline, created_at) VALUES ($1, $2, $3, $4)",
         idea_id,
-        idea.title,
-        idea.tagline,
+        title.into(),
+        tagline.into(),
         Utc::now()
     )
     .execute(db)

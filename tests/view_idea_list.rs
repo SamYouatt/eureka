@@ -1,6 +1,5 @@
 use chrono::Utc;
 use sqlx::types::Uuid;
-use eureka::domain::idea::Idea;
 use sqlx::PgPool;
 
 use crate::startup::spawn_test_app;
@@ -31,9 +30,15 @@ async fn can_view_idea_list() {
 }
 
 async fn seed_ideas(db: &PgPool) {
-    let idea1 = Idea::new("First idea", "One");
+    let idea1 = Idea {
+        title: "First idea".into(),
+        tagline: "One".into(),
+    };
     insert_idea(db, idea1).await;
-    let idea2 = Idea::new("Second idea", "Two");
+    let idea2 = Idea {
+        title: "Second idea".into(),
+        tagline: "Two".into(),
+    };
     insert_idea(db, idea2).await;
 }
 
@@ -48,4 +53,9 @@ async fn insert_idea(db: &PgPool, idea: Idea) {
     .execute(db)
     .await
     .unwrap();
+}
+
+struct Idea {
+    title: String,
+    tagline: String,
 }
