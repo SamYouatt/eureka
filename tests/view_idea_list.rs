@@ -23,8 +23,9 @@ async fn can_view_idea_list() {
         .expect("Failed to execute request.");
 
     // Assert
-    let response_body = response.text().await.unwrap();
+    assert!(response.status().is_success());
 
+    let response_body = response.text().await.unwrap();
     assert_eq!(1, response_body.match_indices("First idea").count());
     assert_eq!(1, response_body.match_indices("Second idea").count());
 }
