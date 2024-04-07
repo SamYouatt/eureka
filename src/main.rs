@@ -5,7 +5,7 @@ use tokio::net::TcpListener;
 #[tokio::main]
 async fn main() -> Result<(), std::io::Error> {
     // Tracing setup
-    let subscriber = get_subscriber("eureka".into(), "info".into());
+    let subscriber = get_subscriber("eureka".into(), "info".into(), std::io::stdout);
     init_subscriber(subscriber);
 
     // Load configuration
