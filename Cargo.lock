@@ -428,6 +428,7 @@ name = "eureka"
 version = "0.1.0"
 dependencies = [
  "axum",
+ "chrono",
  "config",
  "maud",
  "reqwest",
