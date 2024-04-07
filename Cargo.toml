@@ -19,7 +19,8 @@ config = "0.14.0"
 maud = { version = "0.26.0", features = ["axum"] }
 serde = { version = "1.0.197", features = ["derive"] }
 tokio = { version = "1.36.0", features = ["macros", "rt-multi-thread"] }
-tower-http = { version = "0.5.2", features = ["fs"] }
+tower-http = { version = "0.5.2", features = ["fs", "trace"] }
+tracing = "0.1.40"
 uuid = { version = "1.8.0", features = ["v4"] }
 
 [dependencies.sqlx]
