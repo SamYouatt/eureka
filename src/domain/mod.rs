@@ -1,2 +1,2 @@
-pub(crate) mod idea;
+pub mod idea;
 pub(crate) mod page;
