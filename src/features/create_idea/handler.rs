@@ -4,7 +4,10 @@ use axum::{
     response::IntoResponse,
     Form,
 };
+use chrono::Utc;
 use serde::Deserialize;
+use sqlx::query;
+use uuid::Uuid;
 
 use crate::{domain::page::page, AppState, Idea};
 
@@ -26,7 +29,19 @@ pub async fn create_idea(
 ) -> impl IntoResponse {
     let new_idea = Idea::new(&new_idea.name, &new_idea.tagline);
 
-    state.ideas.lock().unwrap().push(new_idea.clone());
+    if let Err(e) = query!(
+        "INSERT INTO ideas (id, title, tagline, created_at) VALUES ($1, $2, $3, $4)",
+        Uuid::new_v4(),
+        new_idea.title,
+        new_idea.tagline,
+        Utc::now()
+    )
+    .execute(&state.db)
+    .await
+    {
+        println!("Failed to execute query: {}", e);
+        return (HeaderMap::new(), StatusCode::INTERNAL_SERVER_ERROR);
+    }
 
     let mut headers = HeaderMap::new();
     headers.insert("HX-Redirect", "/".parse().unwrap());
