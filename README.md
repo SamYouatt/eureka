@@ -21,8 +21,10 @@ To run the main app simply run `cargo run`. For development I have been using `c
 
 ### Tailwind
 
-To luanch the tailwind compiler in watch mode run `npx tailwindcss -i ./styles/tailwind.css -o ./assets/main.css --watch`. This will rebuild the `app/main.css` based on whatever has changed.
+To launch the tailwind compiler in watch mode run `npx tailwindcss -i ./styles/tailwind.css -o ./assets/main.css --watch`. This will rebuild the `app/main.css` based on whatever has changed.
 
-### Supabase
+### Postgres
 
-Chose to use Supabase as it looked like a nice way of hosting a Postgres instance. To launch the db locally run: `supabase start` with the docker daemon running.
+To spin up a local postgres instance for the db and run all the migrations, run the `init_db.sh` script. It has an optional flag to skip docker if an instance of the db is already running - useful if you want to run migrations again without shutting down the db.
+
+`./scripts/init_db.sh` or `SKIP_DOCKER=true ./scripts/init_db.sh`
