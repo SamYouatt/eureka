@@ -1,6 +1,6 @@
 use chrono::Utc;
-use sqlx::types::Uuid;
 use eureka::domain::idea::Idea;
+use sqlx::types::Uuid;
 use sqlx::PgPool;
 
 use crate::startup::spawn_test_app;
@@ -8,7 +8,7 @@ use crate::startup::spawn_test_app;
 pub mod startup;
 
 #[tokio::test]
-async fn can_view_idea_list() {
+async fn can_view_idea() {
     // Arrange
     let test_app = spawn_test_app().await;
     let client = reqwest::Client::new();
@@ -37,7 +37,7 @@ async fn seed_idea(db: &PgPool, title: &str, tagline: &str) -> Uuid {
 
     sqlx::query!(
         "INSERT INTO ideas (id, title, tagline, created_at) VALUES ($1, $2, $3, $4)",
-        Uuid::new_v4(),
+        idea_id,
         idea.title,
         idea.tagline,
         Utc::now()
