@@ -1,6 +1,6 @@
 use eureka::{
     configuration::{get_configuration, DatabaseSettings},
-    startup::run,
+    startup::run, telemetry::{get_subscriber, init_subscriber},
 };
 use sqlx::{Connection, Executor, PgConnection, PgPool};
 use tokio::net::TcpListener;
@@ -12,6 +12,9 @@ pub struct TestApp {
 }
 
 pub async fn spawn_test_app() -> TestApp {
+    let subscriber = get_subscriber("test".into(), "debug".into());
+    init_subscriber(subscriber);
+
     let listener = TcpListener::bind("127.0.0.1:0")
         .await
         .expect("Failed to bind listener");
