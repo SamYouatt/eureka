@@ -1,6 +1,7 @@
 use std::sync::{Arc, Mutex};
 
 use domain::idea::Idea;
+use sqlx::PgPool;
 
 pub mod domain;
 pub mod features;
@@ -10,6 +11,7 @@ pub mod startup;
 #[derive(Clone)]
 pub struct AppState {
     ideas: Arc<Mutex<Vec<Idea>>>,
+    db: PgPool,
 }
 
 fn generate_seed_data() -> Vec<Idea> {
