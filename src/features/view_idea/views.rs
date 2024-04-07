@@ -1,6 +1,6 @@
 use maud::{html, Markup};
 
-use crate::domain::idea::Idea;
+use super::handler::Idea;
 
 pub fn idea_view(idea: &Idea) -> Markup {
     html! {

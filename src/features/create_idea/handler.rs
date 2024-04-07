@@ -9,7 +9,7 @@ use serde::Deserialize;
 use sqlx::query;
 use uuid::Uuid;
 
-use crate::{domain::page::page, AppState, Idea};
+use crate::{domain::page::page, AppState};
 
 use super::views::new_idea_form;
 
@@ -27,12 +27,10 @@ pub async fn create_idea(
     State(state): State<AppState>,
     Form(new_idea): Form<NewIdea>,
 ) -> impl IntoResponse {
-    let new_idea = Idea::new(&new_idea.name, &new_idea.tagline);
-
     if let Err(e) = query!(
         "INSERT INTO ideas (id, title, tagline, created_at) VALUES ($1, $2, $3, $4)",
         Uuid::new_v4(),
-        new_idea.title,
+        new_idea.name,
         new_idea.tagline,
         Utc::now()
     )

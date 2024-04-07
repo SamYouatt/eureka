@@ -12,7 +12,7 @@ pub struct TestApp {
 }
 
 pub async fn spawn_test_app() -> TestApp {
-    let listener = TcpListener::bind("0.0.0.0:0")
+    let listener = TcpListener::bind("127.0.0.1:0")
         .await
         .expect("Failed to bind listener");
     let port = listener.local_addr().unwrap().port();
