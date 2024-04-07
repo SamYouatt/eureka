@@ -14,16 +14,19 @@ pub struct Idea {
 }
 
 pub async fn get_ideas(State(state): State<AppState>) -> impl IntoResponse {
+    tracing::info!("Loading all ideas from db");
     let ideas: Vec<Idea> = match query_as!(Idea, "SELECT id, title, tagline FROM ideas")
         .fetch_all(&state.db)
         .await
     {
         Ok(ideas) => ideas,
         Err(e) => {
-            println!("Failed to get ideas from db: {e}");
+            tracing::error!("Failed to get ideas from db: {:?}", e);
             return html!{ p { "Oops, something went wrong getting your ideas..." } };
         },
     };
+
+    tracing::info!("Loaded all ideas successfully");
 
     page(ideas_list(&ideas))
 }

@@ -16,9 +16,13 @@ pub struct Idea {
 pub async fn get_idea(State(state): State<AppState>, Path(id): Path<String>) -> impl IntoResponse {
     let id = match Uuid::parse_str(&id) {
         Ok(id) => id,
-        Err(_) => return missing_idea(),
+        Err(e) => {
+            tracing::error!("Failed to parse uuid from {:?}: {:?}", id, e);
+            return missing_idea()
+        },
     };
 
+    tracing::info!("Loading idea {} from db", id);
     let query = query_as!(Idea, "SELECT title, tagline FROM ideas WHERE id = $1", id);
 
     let idea = match query.fetch_one(&state.db).await {
@@ -28,6 +32,8 @@ pub async fn get_idea(State(state): State<AppState>, Path(id): Path<String>) -> 
             return missing_idea();
         },
     };
+
+    tracing::info!("Fetched idea {} successfully", id);
 
     idea_view(&idea)
 }

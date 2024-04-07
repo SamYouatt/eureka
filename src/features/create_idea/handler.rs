@@ -17,7 +17,7 @@ pub async fn create_idea_page() -> impl IntoResponse {
     page(new_idea_form())
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 pub struct NewIdea {
     name: String,
     tagline: String,
@@ -27,6 +27,7 @@ pub async fn create_idea(
     State(state): State<AppState>,
     Form(new_idea): Form<NewIdea>,
 ) -> impl IntoResponse {
+    tracing::info!("Inserting new idea into database: {:?}", new_idea);
     if let Err(e) = query!(
         "INSERT INTO ideas (id, title, tagline, created_at) VALUES ($1, $2, $3, $4)",
         Uuid::new_v4(),
@@ -37,9 +38,11 @@ pub async fn create_idea(
     .execute(&state.db)
     .await
     {
-        println!("Failed to execute query: {}", e);
+        tracing::error!("Failed to execute query: {:?}", e);
         return (HeaderMap::new(), StatusCode::INTERNAL_SERVER_ERROR);
     }
+
+    tracing::info!("Idea inserted succesfully");
 
     let mut headers = HeaderMap::new();
     headers.insert("HX-Redirect", "/".parse().unwrap());
