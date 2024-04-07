@@ -1,12 +1,13 @@
-use eureka::startup::run;
-use tokio::net::TcpListener;
+use crate::startup::spawn_test_app;
+
+pub mod startup;
 
 #[tokio::test]
 async fn server_is_launched() {
     // Arrange
-    let port = spawn_app().await;
+    let test_app = spawn_test_app().await;
     let client = reqwest::Client::new();
-    let url = format!("{}/health_check", port);
+    let url = format!("{}/health_check", test_app.address);
 
     // Act
     let response = client
@@ -18,15 +19,4 @@ async fn server_is_launched() {
     // Assert
     assert!(response.status().is_success());
     assert_eq!(response.content_length(), Some(0));
-}
-
-async fn spawn_app() -> String {
-    let listener = TcpListener::bind("0.0.0.0:0").await.expect("Failed to bind listener");
-    let port = listener.local_addr().unwrap().port();
-
-    let server = run(listener).await.expect("Failed to spawn server");
-
-    let _ = tokio::spawn(async { server.await });
-
-    format!("http://127.0.0.1:{}", port) 
 }
