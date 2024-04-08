@@ -26,7 +26,7 @@ fn idea_row(idea: &Idea) -> Markup {
     html! {
         div class="flex flex-col p-2 mx-auto hover:bg-slate-100 dark:hover:bg-indigo-800" hx-get=(route) hx-target="#idea_pane" id=(div_id) {
             h2 class="text-base text-black dark:text-white" { (idea.title) }
-            p class="text-sm text-slate-500 dark:text-slate-300" { (idea.tagline) }
+            p class="text-xs text-slate-500 dark:text-slate-300" { (idea.tagline) }
         }
     }
 }
