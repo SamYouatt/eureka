@@ -28,7 +28,6 @@ pub struct NewIdea {
     name="Creating new idea",
     skip(state, new_idea),
     fields(
-        request_id = %Uuid::new_v4(),
         idea_title = %new_idea.name,
     )
 )]
@@ -43,9 +42,7 @@ pub async fn create_idea(
 
             (headers, StatusCode::OK)
         }
-        Err(_) => {
-            (HeaderMap::new(), StatusCode::INTERNAL_SERVER_ERROR)
-        }
+        Err(_) => (HeaderMap::new(), StatusCode::INTERNAL_SERVER_ERROR),
     }
 }
 
