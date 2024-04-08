@@ -12,7 +12,7 @@ pub fn page(content: Markup) -> Markup {
             { }
         link href="/assets/main.css" rel="stylesheet";
         link href="https://rsms.me/inter/inter.css" rel="stylesheet";
-        body class="h-dvh flex flex-col bg-slate-50 dark:bg-slate-800 dark:[color-scheme:dark]" {
+        body class="h-dvh flex flex-col bg-slate-200 dark:bg-slate-800 dark:[color-scheme:dark]" {
             (navbar())
             (content)
         }
