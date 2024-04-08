@@ -43,6 +43,11 @@ pub async fn run(
         .make_span_with(trace::DefaultMakeSpan::new().level(Level::INFO))
         .on_response(trace::DefaultOnResponse::new().level(Level::INFO));
 
+    let request_id_layer = ServiceBuilder::new()
+        .set_x_request_id(MakeRequestWithTracingId)
+        .layer(trace_layer)
+        .propagate_x_request_id();
+
     let app = Router::new()
         .route("/", get(get_ideas))
         .route("/health_check", get(health_check))
@@ -53,7 +58,7 @@ pub async fn run(
             "/assets",
             ServeDir::new(format!("{}/assets", assets_path.to_str().unwrap())),
         )
-        .layer(trace_layer);
+        .layer(request_id_layer);
 
     Ok(axum::serve(listener, app))
 }
