@@ -1,11 +1,15 @@
-use axum::{routing::get, serve::Serve, Router};
+use axum::{http::Request, routing::get, serve::Serve, Router};
 use sqlx::PgPool;
 use tokio::net::TcpListener;
+use tower::ServiceBuilder;
 use tower_http::{
+    request_id::{MakeRequestId, RequestId},
     services::ServeDir,
     trace::{self, TraceLayer},
+    ServiceBuilderExt,
 };
 use tracing::Level;
+use uuid::Uuid;
 
 use crate::{
     features::{
@@ -16,6 +20,16 @@ use crate::{
     },
     AppState,
 };
+
+#[derive(Clone)]
+struct MakeRequestWithTracingId;
+
+impl MakeRequestId for MakeRequestWithTracingId {
+    fn make_request_id<B>(&mut self, _: &Request<B>) -> Option<RequestId> {
+        let request_id = Uuid::new_v4().to_string();
+        Some(RequestId::new(request_id.parse().unwrap()))
+    }
+}
 
 pub async fn run(
     listener: TcpListener,
