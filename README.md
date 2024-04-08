@@ -19,6 +19,8 @@ Introducing the PHART stack:
 
 To run the main app simply run `cargo run`. For development I have been using `cargo watch -x check -x test -x run` for quick feedback. Any of `-x step` can be excluded if not required.
 
+> Actually I have now started using `cargo watch -x check -x test -x run | bunyan` for its nicer formatting of the tracing
+
 ### Tailwind
 
 To launch the tailwind compiler in watch mode run `npx tailwindcss -i ./styles/tailwind.css -o ./assets/main.css --watch`. This will rebuild the `app/main.css` based on whatever has changed.
