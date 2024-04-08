@@ -40,8 +40,16 @@ pub async fn run(
     let assets_path = std::env::current_dir().unwrap();
 
     let trace_layer = TraceLayer::new_for_http()
-        .make_span_with(trace::DefaultMakeSpan::new().level(Level::INFO))
-        .on_response(trace::DefaultOnResponse::new().level(Level::INFO));
+        .make_span_with(
+            trace::DefaultMakeSpan::new()
+                .include_headers(true)
+                .level(Level::INFO),
+        )
+        .on_response(
+            trace::DefaultOnResponse::new()
+                .include_headers(true)
+                .level(Level::INFO),
+        );
 
     let request_id_layer = ServiceBuilder::new()
         .set_x_request_id(MakeRequestWithTracingId)
