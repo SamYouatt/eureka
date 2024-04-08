@@ -588,6 +588,10 @@ video {
   height: fit-content;
 }
 
+.max-h-full {
+  max-height: 100%;
+}
+
 .w-full {
   width: 100%;
 }
