@@ -4,13 +4,13 @@ use super::handler::Idea;
 
 pub fn ideas_list(ideas: &[Idea]) -> Markup {
     html! {
-        div class="h-full grid grid-cols-4 overflow-auto divide-x-2 divide-solid divide-slate-200 dark:divide-slate-700" {
-            div #ideas_list class="overflow-auto divide-y divide-solid divide-slate-200 dark:divide-slate-700" {
+        div class="h-full flex flex-row gap-4 p-4 overflow-auto divide-solid divide-slate-200 dark:divide-slate-700" {
+            div #ideas_list class="overflow-auto rounded-md bg-white shrink basis-72 max-width-72 divide-y divide-solid divide-slate-200 dark:divide-slate-700" {
                 @for idea in ideas {
                     (idea_row(idea))
                 }
             }
-            div #idea_pane class="col-span-3 h-full overflow-auto" {
+            div #idea_pane class="h-full grow overflow-auto bg-white rounded-md" {
                 div class="flex items-center justify-center h-full" {
                     p class="dark:text-white" { "What will you think of today?" }
                 }
@@ -30,4 +30,3 @@ fn idea_row(idea: &Idea) -> Markup {
         }
     }
 }
-
