@@ -12,7 +12,7 @@ pub fn page(content: Markup) -> Markup {
             { }
         link href="/assets/main.css" rel="stylesheet";
         link href="https://rsms.me/inter/inter.css" rel="stylesheet";
-        body class="h-dvh flex flex-col bg-slate-50 dark:bg-slate-800 dark:[color-scheme:dark]" {
+        body class="h-dvh flex flex-col bg-slate-200 dark:bg-slate-800 dark:[color-scheme:dark]" {
             (navbar())
             (content)
         }
@@ -21,12 +21,8 @@ pub fn page(content: Markup) -> Markup {
 
 fn navbar() -> Markup {
     html! {
-        nav class="bg-slate-900 w-full border-b border-slate-600 flex flex-wrap items-center justify-between mx-auto p-4" {
-            a href="/" class="text-3xl text-indigo-500 font-bold" { "Eureka" }
-            a
-                href="/ideas/new"
-                class="bg-indigo-500 text-white hover:bg-indigo-700 focus:ring-4 focus:outline-none rounded-lg text-sm px-4 py-2 text-center"
-                { "New Idea" }
+        nav class="bg-slate-900 w-full flex flex-wrap items-center justify-between mx-auto p-4" {
+            a href="/" class="text-3xl text-pink-500 font-bold" { "Eureka" }
         }
     }
 }

@@ -4,13 +4,18 @@ use super::handler::Idea;
 
 pub fn ideas_list(ideas: &[Idea]) -> Markup {
     html! {
-        div class="h-full grid grid-cols-4 overflow-auto divide-x-2 divide-solid divide-slate-200 dark:divide-slate-700" {
-            div #ideas_list class="overflow-auto divide-y divide-solid divide-slate-200 dark:divide-slate-700" {
-                @for idea in ideas {
-                    (idea_row(idea))
+        div class="h-full flex flex-row gap-4 p-4 overflow-auto divide-solid divide-slate-200 dark:divide-slate-700" {
+            div #ideas_list class="h-fit max-h-full flex flex-col shrink basis-72 max-width-72 rounded-md bg-white divide-y divide-solid divide-slate-200 overflow-auto" {
+                div class="overflow-auto divide-y divide-solid divide-slate-200 dark:divide-slate-700" {
+                    @for idea in ideas {
+                        (idea_row(idea))
+                    }
+                }
+                div class="p-2" {
+                    a href="/ideas/new" class="bg-pink-500 text-white hover:bg-pink-700 text-sm rounded-md px-2 py-1 text-center" { "New idea" }
                 }
             }
-            div #idea_pane class="col-span-3 h-full overflow-auto" {
+            div #idea_pane class="h-full grow overflow-auto bg-white rounded-md" {
                 div class="flex items-center justify-center h-full" {
                     p class="dark:text-white" { "What will you think of today?" }
                 }
@@ -26,8 +31,7 @@ fn idea_row(idea: &Idea) -> Markup {
     html! {
         div class="flex flex-col p-2 mx-auto hover:bg-slate-100 dark:hover:bg-indigo-800" hx-get=(route) hx-target="#idea_pane" id=(div_id) {
             h2 class="text-base text-black dark:text-white" { (idea.title) }
-            p class="text-sm text-slate-500 dark:text-slate-300" { (idea.tagline) }
+            p class="text-xs text-slate-500 dark:text-slate-300" { (idea.tagline) }
         }
     }
 }
-
