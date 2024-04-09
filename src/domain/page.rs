@@ -12,7 +12,7 @@ pub fn page(content: Markup) -> Markup {
             { }
         link href="/assets/main.css" rel="stylesheet";
         link href="https://rsms.me/inter/inter.css" rel="stylesheet";
-        body class="h-dvh flex flex-col bg-slate-100 dark:bg-slate-800 dark:[color-scheme:dark]" {
+        body class="h-dvh flex flex-col bg-slate-100 dark:bg-slate-900 dark:[color-scheme:dark]" {
             (navbar())
             (content)
         }
@@ -21,7 +21,7 @@ pub fn page(content: Markup) -> Markup {
 
 fn navbar() -> Markup {
     html! {
-        nav class="bg-white w-full flex flex-wrap items-center justify-between mx-auto p-4 border-b-2 border-slate-200" {
+        nav class="bg-white dark:bg-slate-800 w-full flex flex-wrap items-center justify-between mx-auto p-4 border-b-2 border-slate-200 dark:border-slate-700" {
             a href="/" class="text-3xl text-pink-500 font-bold" { "Eureka" }
         }
     }
