@@ -21,7 +21,7 @@ pub fn page(content: Markup) -> Markup {
 
 fn navbar() -> Markup {
     html! {
-        nav class="bg-slate-900 w-full flex flex-wrap items-center justify-between mx-auto p-4" {
+        nav class="bg-white w-full flex flex-wrap items-center justify-between mx-auto p-4 border-b-2 border-slate-200" {
             a href="/" class="text-3xl text-pink-500 font-bold" { "Eureka" }
         }
     }
