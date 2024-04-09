@@ -5,7 +5,7 @@ use super::handler::Idea;
 pub fn ideas_list(ideas: &[Idea]) -> Markup {
     html! {
         div class="h-full flex flex-row gap-4 p-4 overflow-auto divide-solid divide-slate-200 dark:divide-slate-700" {
-            div #ideas_list class="h-fit max-h-full flex flex-col shrink basis-72 max-width-72 rounded-md bg-white divide-y divide-solid divide-slate-200 overflow-auto" {
+            div #ideas_list class="h-fit max-h-full flex flex-col shrink basis-72 max-width-72 rounded-md bg-white divide-y divide-solid divide-slate-200 border-2 border-slate-200 overflow-auto" {
                 div class="overflow-auto divide-y divide-solid divide-slate-200 dark:divide-slate-700" {
                     @for idea in ideas {
                         (idea_row(idea))
@@ -15,7 +15,7 @@ pub fn ideas_list(ideas: &[Idea]) -> Markup {
                     a href="/ideas/new" class="bg-pink-500 text-white hover:bg-pink-700 text-sm rounded-md px-2 py-1 text-center" { "New idea" }
                 }
             }
-            div #idea_pane class="h-full grow overflow-auto bg-white rounded-md" {
+            div #idea_pane class="h-full grow overflow-auto bg-white rounded-md border-2 border-slate-200" {
                 div class="flex items-center justify-center h-full" {
                     p class="dark:text-white" { "What will you think of today?" }
                 }
