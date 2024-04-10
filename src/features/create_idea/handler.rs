@@ -11,11 +11,19 @@ use uuid::Uuid;
 
 use crate::{domain::page::page, AppState};
 
-use super::views::new_idea_form;
+use super::views::{new_idea_button, new_idea_form};
 
 #[tracing::instrument(name = "Render new idea form")]
 pub async fn create_idea_page() -> impl IntoResponse {
     page(new_idea_form())
+}
+
+pub async fn get_idea_form() -> impl IntoResponse {
+    new_idea_form()
+}
+
+pub async fn cancel_idea_form() -> impl IntoResponse {
+    new_idea_button()
 }
 
 #[derive(Deserialize, Debug)]

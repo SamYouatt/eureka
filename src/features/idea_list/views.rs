@@ -11,9 +11,11 @@ pub fn ideas_list(ideas: &[Idea]) -> Markup {
                         (idea_row(idea))
                     }
                 }
-                div class="p-2" {
-                    a href="/ideas/new" class="bg-pink-500 text-white hover:bg-pink-700 text-sm rounded-md px-2 py-1 text-center" { "New idea" }
+                div class="p-2" id="idea-list-footer" {
+                    button hx-get="ideas/new/form" hx-target="#idea-list-footer" { "New idea" }
+                    // a href="/ideas/new" class="bg-pink-500 text-white hover:bg-pink-700 text-sm rounded-md px-2 py-1 text-center" { "New idea" }
                 }
+                div id="new-idea-form-hook" class="hidden" { }
             }
             div #idea_pane class="h-full grow overflow-auto bg-white dark:bg-slate-800 rounded-md border-2 border-slate-200 dark:border-slate-700" {
                 div class="flex items-center justify-center h-full" {
