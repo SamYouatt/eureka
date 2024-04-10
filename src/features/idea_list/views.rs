@@ -11,9 +11,8 @@ pub fn ideas_list(ideas: &[Idea]) -> Markup {
                         (idea_row(idea))
                     }
                 }
-                div class="p-2" id="idea-list-footer" {
-                    button hx-get="ideas/new/form" hx-target="#idea-list-footer" { "New idea" }
-                    // a href="/ideas/new" class="bg-pink-500 text-white hover:bg-pink-700 text-sm rounded-md px-2 py-1 text-center" { "New idea" }
+                div class="p-2 bg-slate-200 dark:bg-slate-700" id="idea-list-footer" {
+                    button hx-get="ideas/new/form" hx-target="#idea-list-footer" class="text-pink-500 hover:underline text-sm px-2 py-1" { "New idea" }
                 }
                 div id="new-idea-form-hook" class="hidden" { }
             }

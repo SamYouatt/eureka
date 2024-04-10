@@ -11,7 +11,7 @@ use uuid::Uuid;
 
 use crate::{domain::page::page, AppState};
 
-use super::views::{new_idea_button, new_idea_form};
+use super::views::{error_form, new_idea_button, new_idea_form};
 
 #[tracing::instrument(name = "Render new idea form")]
 pub async fn create_idea_page() -> impl IntoResponse {
@@ -26,31 +26,60 @@ pub async fn cancel_idea_form() -> impl IntoResponse {
     new_idea_button()
 }
 
-#[derive(Deserialize, Debug)]
-pub struct NewIdea {
+#[derive(Deserialize, Debug, Clone)]
+pub struct NewIdeaForm {
     name: String,
     tagline: String,
 }
 
+struct NewIdea {
+    name: String,
+    tagline: String,
+}
+
+impl TryFrom<NewIdeaForm> for NewIdea {
+    type Error = String;
+
+    fn try_from(value: NewIdeaForm) -> Result<Self, Self::Error> {
+        if value.name.len() < 3 {
+            return Err("Your idea name must be at least 3 characters long".into());
+        }
+
+        if value.name.len() > 64 {
+            return Err("Your idea name can't be longer than 64 characters".into());
+        }
+
+        Ok(NewIdea {
+            name: value.name,
+            tagline: value.tagline,
+        })
+    }
+}
+
 #[tracing::instrument(
     name="Creating new idea",
-    skip(state, new_idea),
+    skip(state, new_idea_form),
     fields(
-        idea_title = %new_idea.name,
+        idea_title = %new_idea_form.name,
     )
 )]
 pub async fn create_idea(
     State(state): State<AppState>,
-    Form(new_idea): Form<NewIdea>,
-) -> impl IntoResponse {
+    Form(new_idea_form): Form<NewIdeaForm>,
+) -> axum::response::Response {
+    let new_idea = match NewIdea::try_from(new_idea_form.clone()) {
+        Ok(new_idea) => new_idea,
+        Err(new_idea_error) => return error_form(&new_idea_form.name, &new_idea_form.tagline, &new_idea_error).into_response(),
+    };
+
     match insert_idea(&state.db, new_idea).await {
         Ok(_) => {
             let mut headers = HeaderMap::new();
             headers.insert("HX-Redirect", "/".parse().unwrap());
 
-            (headers, StatusCode::OK)
+            (headers, StatusCode::OK).into_response()
         }
-        Err(_) => (HeaderMap::new(), StatusCode::INTERNAL_SERVER_ERROR),
+        Err(_) => (HeaderMap::new(), StatusCode::INTERNAL_SERVER_ERROR).into_response(),
     }
 }
 
