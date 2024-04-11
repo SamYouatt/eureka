@@ -11,7 +11,7 @@ use uuid::Uuid;
 
 use crate::{domain::page::page, AppState};
 
-use super::views::{error_form, new_idea_button, new_idea_form};
+use super::views::{error_form, new_idea_button, new_idea_form, new_idea_row};
 
 #[tracing::instrument(name = "Render new idea form")]
 pub async fn create_idea_page() -> impl IntoResponse {
@@ -32,9 +32,9 @@ pub struct NewIdeaForm {
     tagline: String,
 }
 
-struct NewIdea {
-    name: String,
-    tagline: String,
+pub struct NewIdea {
+    pub name: String,
+    pub tagline: String,
 }
 
 impl TryFrom<NewIdeaForm> for NewIdea {
@@ -72,22 +72,21 @@ pub async fn create_idea(
         Err(new_idea_error) => return error_form(&new_idea_form.name, &new_idea_form.tagline, &new_idea_error).into_response(),
     };
 
-    match insert_idea(&state.db, new_idea).await {
-        Ok(_) => {
-            let mut headers = HeaderMap::new();
-            headers.insert("HX-Redirect", "/".parse().unwrap());
-
-            (headers, StatusCode::OK).into_response()
+    match insert_idea(&state.db, &new_idea).await {
+        Ok(idea_id) => {
+            return new_idea_row(&new_idea, idea_id).into_response();
         }
         Err(_) => (HeaderMap::new(), StatusCode::INTERNAL_SERVER_ERROR).into_response(),
     }
 }
 
 #[tracing::instrument(name = "Saving new idea to database", skip(db, idea))]
-async fn insert_idea(db: &PgPool, idea: NewIdea) -> Result<(), sqlx::Error> {
+async fn insert_idea(db: &PgPool, idea: &NewIdea) -> Result<Uuid, sqlx::Error> {
+    let id = Uuid::new_v4();
+
     query!(
         "INSERT INTO ideas (id, title, tagline, created_at) VALUES ($1, $2, $3, $4)",
-        Uuid::new_v4(),
+        id,
         idea.name,
         idea.tagline,
         Utc::now()
@@ -99,5 +98,5 @@ async fn insert_idea(db: &PgPool, idea: NewIdea) -> Result<(), sqlx::Error> {
         e
     })?;
 
-    Ok(())
+    Ok(id)
 }

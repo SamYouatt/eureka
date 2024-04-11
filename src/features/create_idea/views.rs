@@ -1,4 +1,9 @@
 use maud::{html, Markup};
+use uuid::Uuid;
+
+use crate::features::idea_list::views::idea_row;
+
+use super::handler::NewIdea;
 
 pub fn new_idea_form() -> Markup {
     html! {
@@ -42,5 +47,12 @@ pub fn error_form(current_name: &str, current_tagline: &str, name_error: &str) -
 pub fn new_idea_button() -> Markup {
     html! {
         button hx-get="ideas/new/form" hx-target="#idea-list-footer" class="text-pink-500 hover:underline text-sm px-2 py-1" { "New idea" }
+    }
+}
+
+pub fn new_idea_row(idea: &NewIdea, id: Uuid) -> Markup {
+    html! {
+        (new_idea_button())
+        div hx-swap-oob="afterbegin:#ideas_list" { (idea_row(&idea.name, &idea.tagline, &id)) }
     }
 }
