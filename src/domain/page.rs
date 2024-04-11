@@ -9,7 +9,8 @@ pub fn page(content: Markup) -> Markup {
             src="https://unpkg.com/htmx.org@1.9.11"
             integrity="sha384-0gxUXCCR8yv9FM2b+U3FDbsKthCI66oH5IA9fHppQq9DDMHuMauqq1ZHBpJxQ0J0"
             crossorigin="anonymous"
-            { }
+            {}
+        script src="/assets/main.js" {}
         link href="/assets/main.css" rel="stylesheet";
         link href="https://rsms.me/inter/inter.css" rel="stylesheet";
         body class="h-dvh flex flex-col bg-slate-100 dark:bg-slate-900 dark:[color-scheme:dark]" {

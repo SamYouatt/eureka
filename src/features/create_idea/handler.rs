@@ -69,7 +69,13 @@ pub async fn create_idea(
 ) -> axum::response::Response {
     let new_idea = match NewIdea::try_from(new_idea_form.clone()) {
         Ok(new_idea) => new_idea,
-        Err(new_idea_error) => return error_form(&new_idea_form.name, &new_idea_form.tagline, &new_idea_error).into_response(),
+        Err(new_idea_error) => {
+            return (
+                StatusCode::UNPROCESSABLE_ENTITY,
+                error_form(&new_idea_form.name, &new_idea_form.tagline, &new_idea_error),
+            )
+                .into_response()
+        }
     };
 
     match insert_idea(&state.db, &new_idea).await {
