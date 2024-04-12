@@ -29,16 +29,9 @@ tracing-subscriber = { version = "0.3.18", features = ["registry", "env-filter"]
 uuid = { version = "1.8.0", features = ["v4"] }
 
 [dependencies.sqlx]
-version = "0.6"
+version = "0.7.4"
 default-features = false 
-features = [
-    "runtime-tokio-rustls",
-    "macros",
-    "migrate",
-    "postgres",
-    "uuid",
-    "chrono"
-]
+features = ["runtime-tokio-rustls", "macros", "migrate", "postgres", "uuid", "chrono"]
 
 [dev-dependencies]
 reqwest = "0.12.3"
