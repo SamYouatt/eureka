@@ -9,7 +9,7 @@ async fn can_creat_new_idea() {
 
     let client = reqwest::Client::new();
     let url = format!("{}/ideas/new", test_app.address);
-    
+
     let body = "name=Test%20Idea&tagline=Just%20Testing";
 
     // Act
@@ -32,4 +32,3 @@ async fn can_creat_new_idea() {
     assert_eq!(created_idea.title, "Test Idea");
     assert_eq!(created_idea.tagline, "Just Testing");
 }
-

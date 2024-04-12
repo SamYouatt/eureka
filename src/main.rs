@@ -1,4 +1,8 @@
-use eureka::{configuration::get_configuration, startup::run, telemetry::{get_subscriber, init_subscriber}};
+use eureka::{
+    configuration::get_configuration,
+    startup::run,
+    telemetry::{get_subscriber, init_subscriber},
+};
 use secrecy::ExposeSecret;
 use sqlx::PgPool;
 use tokio::net::TcpListener;

@@ -54,9 +54,10 @@ fn configure_subscriber() {
 
 // Create a new database instance for each test
 async fn configure_database(config: &DatabaseSettings) -> PgPool {
-    let mut connection = PgConnection::connect(&config.connection_string_without_db().expose_secret())
-        .await
-        .expect("Failed to connect to Postgres");
+    let mut connection =
+        PgConnection::connect(&config.connection_string_without_db().expose_secret())
+            .await
+            .expect("Failed to connect to Postgres");
 
     connection
         .execute(format!(r#"CREATE DATABASE "{}";"#, config.database_name).as_str())
