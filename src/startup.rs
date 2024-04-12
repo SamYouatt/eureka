@@ -1,4 +1,4 @@
-use axum::{http::Request, routing::get, serve::Serve, Router};
+use axum::{http::Request, routing::{get, post}, serve::Serve, Router};
 use sqlx::PgPool;
 use tokio::net::TcpListener;
 use tower::ServiceBuilder;
@@ -13,7 +13,7 @@ use uuid::Uuid;
 
 use crate::{
     features::{
-        create_idea::handler::{create_idea, create_idea_page},
+        create_idea::handler::{create_idea, create_idea_page, get_idea_form, cancel_idea_form},
         health_check::health_check,
         idea_list::handler::get_ideas,
         view_idea::handler::get_idea,
@@ -60,6 +60,8 @@ pub async fn run(
         .route("/", get(get_ideas))
         .route("/health_check", get(health_check))
         .route("/ideas/new", get(create_idea_page).post(create_idea))
+        .route("/ideas/new/form", get(get_idea_form))
+        .route("/ideas/new/cancel", post(cancel_idea_form))
         .route("/ideas/:id", get(get_idea))
         .with_state(state)
         .nest_service(

@@ -11,46 +11,88 @@ use uuid::Uuid;
 
 use crate::{domain::page::page, AppState};
 
-use super::views::new_idea_form;
+use super::views::{error_form, new_idea_button, new_idea_form, new_idea_row};
 
 #[tracing::instrument(name = "Render new idea form")]
 pub async fn create_idea_page() -> impl IntoResponse {
     page(new_idea_form())
 }
 
-#[derive(Deserialize, Debug)]
-pub struct NewIdea {
+pub async fn get_idea_form() -> impl IntoResponse {
+    new_idea_form()
+}
+
+pub async fn cancel_idea_form() -> impl IntoResponse {
+    new_idea_button()
+}
+
+#[derive(Deserialize, Debug, Clone)]
+pub struct NewIdeaForm {
     name: String,
     tagline: String,
 }
 
+pub struct NewIdea {
+    pub name: String,
+    pub tagline: String,
+}
+
+impl TryFrom<NewIdeaForm> for NewIdea {
+    type Error = String;
+
+    fn try_from(value: NewIdeaForm) -> Result<Self, Self::Error> {
+        if value.name.len() < 3 {
+            return Err("Your idea name must be at least 3 characters long".into());
+        }
+
+        if value.name.len() > 64 {
+            return Err("Your idea name can't be longer than 64 characters".into());
+        }
+
+        Ok(NewIdea {
+            name: value.name,
+            tagline: value.tagline,
+        })
+    }
+}
+
 #[tracing::instrument(
     name="Creating new idea",
-    skip(state, new_idea),
+    skip(state, new_idea_form),
     fields(
-        idea_title = %new_idea.name,
+        idea_title = %new_idea_form.name,
     )
 )]
 pub async fn create_idea(
     State(state): State<AppState>,
-    Form(new_idea): Form<NewIdea>,
-) -> impl IntoResponse {
-    match insert_idea(&state.db, new_idea).await {
-        Ok(_) => {
-            let mut headers = HeaderMap::new();
-            headers.insert("HX-Redirect", "/".parse().unwrap());
-
-            (headers, StatusCode::OK)
+    Form(new_idea_form): Form<NewIdeaForm>,
+) -> axum::response::Response {
+    let new_idea = match NewIdea::try_from(new_idea_form.clone()) {
+        Ok(new_idea) => new_idea,
+        Err(new_idea_error) => {
+            return (
+                StatusCode::UNPROCESSABLE_ENTITY,
+                error_form(&new_idea_form.name, &new_idea_form.tagline, &new_idea_error),
+            )
+                .into_response()
         }
-        Err(_) => (HeaderMap::new(), StatusCode::INTERNAL_SERVER_ERROR),
+    };
+
+    match insert_idea(&state.db, &new_idea).await {
+        Ok(idea_id) => {
+            return new_idea_row(&new_idea, idea_id).into_response();
+        }
+        Err(_) => (HeaderMap::new(), StatusCode::INTERNAL_SERVER_ERROR).into_response(),
     }
 }
 
 #[tracing::instrument(name = "Saving new idea to database", skip(db, idea))]
-async fn insert_idea(db: &PgPool, idea: NewIdea) -> Result<(), sqlx::Error> {
+async fn insert_idea(db: &PgPool, idea: &NewIdea) -> Result<Uuid, sqlx::Error> {
+    let id = Uuid::new_v4();
+
     query!(
         "INSERT INTO ideas (id, title, tagline, created_at) VALUES ($1, $2, $3, $4)",
-        Uuid::new_v4(),
+        id,
         idea.name,
         idea.tagline,
         Utc::now()
@@ -62,5 +104,5 @@ async fn insert_idea(db: &PgPool, idea: NewIdea) -> Result<(), sqlx::Error> {
         e
     })?;
 
-    Ok(())
+    Ok(id)
 }
