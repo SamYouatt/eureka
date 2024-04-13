@@ -1,0 +1,1 @@
+GRANT ALL PRIVILEGES ON DATABASE eureka TO sam_y_eureka;

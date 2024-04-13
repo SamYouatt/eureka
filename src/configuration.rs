@@ -37,7 +37,7 @@ impl DatabaseSettings {
     pub fn without_db(&self) -> PgConnectOptions {
         let ssl_mode = match self.require_ssl {
             true => PgSslMode::Require,
-            false => PgSslMode::Prefer,
+            false => PgSslMode::Disable,
         };
 
         PgConnectOptions::new()
@@ -69,7 +69,7 @@ pub fn get_configuration() -> Result<Settings, config::ConfigError> {
         .add_source(
             config::Environment::with_prefix("APP")
                 .prefix_separator("_")
-                .prefix_separator("__"),
+                .separator("__"),
         )
         .build()?;
 

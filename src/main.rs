@@ -17,7 +17,7 @@ async fn main() -> Result<(), std::io::Error> {
 
     // DB setup
     let db_pool = PgPoolOptions::new()
-        .acquire_timeout(std::time::Duration::from_secs(30))
+        .acquire_timeout(std::time::Duration::from_secs(3))
         .connect_lazy_with(configuration.database.with_db());
 
     // Network setup

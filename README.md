@@ -71,9 +71,11 @@ To deploy a new version of the app run `fly deploy`.
 
 #### Connecting to postgres
 
-Shouldn't need to do this again, but in order to connect the postgres instance to the app instance it was necessary to run the following.
+Shouldn't need to do this again, but in order to connect the postgres instance to the app instance it was necessary to run the following, specifying the existing datbase name to attach to as well.
 
-`fly postgres attach sam-y-eureka-pg --app sam-y-eureka`
+`fly postgres attach sam-y-eureka-pg -a sam-y-eureka --database-name eureka`
+
+> As part of the attach process fly creates a new user `sam_y_eureka`, I had to write a migration to give it access to the database.
 
 This has also created a new secret in `sam-y-eureka` with the database url used to connect the two apps together. This can't be used directly with this apps config architecture.
 
