@@ -82,3 +82,11 @@ This has also created a new secret in `sam-y-eureka` with the database url used 
 Instead break it into separate pieces and then pass this configuration through into `fly.toml`, except the password which should be stored in a separatae fly secret.
 
 > To update the value in the fly secrets run `fly secrets set APP_DATABASE__PASSWORD=blah`.
+
+### CD with GithubActions
+
+It was necessary to generate a fly deploy token, which is stored in github action secrets as FLY_API_TOKEN.
+
+The configuration for the action is in `.github/workflows/fly.yml`. It will run on merges to master.
+
+> Migrations are not run as part of this!
