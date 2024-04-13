@@ -78,3 +78,5 @@ Shouldn't need to do this again, but in order to connect the postgres instance t
 This has also created a new secret in `sam-y-eureka` with the database url used to connect the two apps together. This can't be used directly with this apps config architecture.
 
 Instead break it into separate pieces and then pass this configuration through into `fly.toml`, except the password which should be stored in a separatae fly secret.
+
+> To update the value in the fly secrets run `fly secrets set APP_DATABASE__PASSWORD=blah`.
