@@ -17,9 +17,7 @@ pub struct Idea {
 pub async fn get_ideas(State(state): State<AppState>) -> impl IntoResponse {
     match fetch_ideas(&state.db).await {
         Ok(ideas) => page(ideas_list(&ideas)),
-        Err(_) => {
-            page(html! { p { "Oops, something went wrong getting your ideas..." } })
-        }
+        Err(_) => page(html! { p { "Oops, something went wrong getting your ideas..." } }),
     }
 }
 
