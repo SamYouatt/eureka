@@ -49,3 +49,13 @@ In order to connect to the running instance locally:
 - Password: check bitwarden
 - Port: 54321
 - Version: 14.0 should work but I'm not actually sure how to tell for certain what version fly is running
+
+### Migrations
+
+Currently it is necessary to run the migrations manually on the running instance.
+
+To do that:
+- Run the proxy as above to get the connection string
+- Run `DATABASE_URL="postgres://postgres:password_from_bitwarden@localhost:54321/eureka" sqlx migrate run` to run the migrations
+- Should see a list of the applied migrations
+
