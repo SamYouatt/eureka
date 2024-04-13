@@ -1,0 +1,31 @@
+# fly.toml app configuration file generated for sam-y-eureka on 2024-04-13T13:28:15+01:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 'sam-y-eureka'
+primary_region = 'lhr'
+
+[env]
+  APP_APPLICATION__BASE_URL = "https://sam-y-eureka.fly.dev/"
+  APP_DATABASE__DATABASE_NAME = "eureka"
+  APP_DATABASE__HOST = "sam-y-eureka-pg.flycast"
+  APP_DATABASE__USERNAME = "sam_y_eureka"
+  # APP_DATABASE__PASSWORD should be a fly secret ONLY
+  APP_DATABASE__PORT = "5432"
+  APP_DATABASE__REQUIRE_SSL = "false"
+
+[build]
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ['app']
+
+[[vm]]
+  memory = '1gb'
+  cpu_kind = 'shared'
+  cpus = 1

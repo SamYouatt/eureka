@@ -1,6 +1,9 @@
-use eureka::{configuration::get_configuration, startup::run, telemetry::{get_subscriber, init_subscriber}};
-use secrecy::ExposeSecret;
-use sqlx::PgPool;
+use eureka::{
+    configuration::get_configuration,
+    startup::run,
+    telemetry::{get_subscriber, init_subscriber},
+};
+use sqlx::postgres::PgPoolOptions;
 use tokio::net::TcpListener;
 
 #[tokio::main]
@@ -13,12 +16,16 @@ async fn main() -> Result<(), std::io::Error> {
     let configuration = get_configuration().expect("Failed to read configuration");
 
     // DB setup
-    let db_pool = PgPool::connect(&configuration.database.connection_string().expose_secret())
-        .await
-        .expect("Failed to connect to Postgres");
+    let db_pool = PgPoolOptions::new()
+        .acquire_timeout(std::time::Duration::from_secs(3))
+        .connect_lazy_with(configuration.database.with_db());
 
     // Network setup
-    let app_address = format!("127.0.0.1:{}", configuration.application_port);
+    let app_address = format!(
+        "{}:{}",
+        configuration.application.host, configuration.application.port
+    );
+
     let listener = TcpListener::bind(app_address)
         .await
         .expect("Failed to bind listener");

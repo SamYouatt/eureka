@@ -1,4 +1,9 @@
-use axum::{http::Request, routing::{get, post}, serve::Serve, Router};
+use axum::{
+    http::Request,
+    routing::{get, post},
+    serve::Serve,
+    Router,
+};
 use sqlx::PgPool;
 use tokio::net::TcpListener;
 use tower::ServiceBuilder;
@@ -13,7 +18,7 @@ use uuid::Uuid;
 
 use crate::{
     features::{
-        create_idea::handler::{create_idea, create_idea_page, get_idea_form, cancel_idea_form},
+        create_idea::handler::{cancel_idea_form, create_idea, create_idea_page, get_idea_form},
         health_check::health_check,
         idea_list::handler::get_ideas,
         view_idea::handler::get_idea,
