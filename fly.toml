@@ -10,6 +10,7 @@ primary_region = 'lhr'
   APP_APPLICATION__BASE_URL = "https://sam-y-eureka.fly.dev/"
   APP_DATABASE__DATABASE_NAME = "eureka"
   APP_DATABASE__HOST = "sam-y-eureka-pg.flycast"
+  APP_DATABASE__USERNAME = "sam_y_eureka"
   # APP_DATABASE__PASSWORD should be a fly secret ONLY
   APP_DATABASE__PORT = "5432"
   APP_DATABASE__REQURE_SSL = "false"
