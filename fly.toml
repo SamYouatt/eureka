@@ -13,7 +13,7 @@ primary_region = 'lhr'
   APP_DATABASE__USERNAME = "sam_y_eureka"
   # APP_DATABASE__PASSWORD should be a fly secret ONLY
   APP_DATABASE__PORT = "5432"
-  APP_DATABASE__REQURE_SSL = "false"
+  APP_DATABASE__REQUIRE_SSL = "false"
 
 [build]
 
