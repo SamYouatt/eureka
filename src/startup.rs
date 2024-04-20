@@ -1,6 +1,7 @@
 use axum::{
     http::Request, routing::{get, post}, serve::Serve, Extension, Router
 };
+use axum_extra::extract::cookie::Key;
 use oauth2::basic::BasicClient;
 use reqwest::Client;
 use sqlx::PgPool;
@@ -17,7 +18,7 @@ use uuid::Uuid;
 
 use crate::{
     features::{
-        auth::handler::{handle_login_redirect, login}, create_idea::handler::{cancel_idea_form, create_idea, create_idea_page, get_idea_form}, health_check::health_check, idea_list::handler::get_ideas, view_idea::handler::get_idea
+        auth::handler::{login_callback, login}, create_idea::handler::{cancel_idea_form, create_idea, create_idea_page, get_idea_form}, health_check::health_check, idea_list::handler::get_ideas, view_idea::handler::get_idea
     },
     AppState,
 };
@@ -37,8 +38,9 @@ pub async fn run(
     db_pool: PgPool,
     open_id_client: BasicClient,
     http_client: Client,
+    cookie_signing_key: Key,
 ) -> Result<Serve<Router, Router>, std::io::Error> {
-    let state = AppState { db: db_pool, http_client };
+    let state = AppState { db: db_pool, http_client, cookie_signing_key };
 
     let assets_path = std::env::current_dir().unwrap();
 
@@ -67,7 +69,7 @@ pub async fn run(
         .route("/ideas/new/cancel", post(cancel_idea_form))
         .route("/ideas/:id", get(get_idea))
         .route("/login", get(login))
-        .route("/login/redirect", get(handle_login_redirect))
+        .route("/login/redirect", get(login_callback))
         .with_state(state)
         .nest_service(
             "/assets",

@@ -1,3 +1,4 @@
+use axum_extra::extract::cookie::Key;
 use eureka::{
     configuration::{get_configuration, DatabaseSettings},
     startup::run,
@@ -29,8 +30,9 @@ pub async fn spawn_test_app() -> TestApp {
     let open_id_client = configuration.openid.build_client();
 
     let http_client = Client::new();
+    let cookie_signing_key = Key::generate();
 
-    let server = run(listener, db_pool.clone(), open_id_client, http_client)
+    let server = run(listener, db_pool.clone(), open_id_client, http_client, cookie_signing_key)
         .await
         .expect("Failed to spawn server");
 
