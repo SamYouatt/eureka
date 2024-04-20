@@ -15,7 +15,7 @@ path = "src/main.rs"
 [dependencies]
 anyhow = "1.0.82"
 axum = { version = "0.7.4", features = ["form"] }
-axum-extra = { version = "0.9.3", features = ["cookie"] }
+axum-extra = { version = "0.9.3", features = ["cookie", "cookie-private"] }
 chrono = { version = "0.4.37", default-features = false, features = ["clock"] }
 config = "0.14.0"
 maud = { version = "0.26.0", features = ["axum"] }
