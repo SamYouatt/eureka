@@ -4,11 +4,16 @@ use eureka::{
     startup::run,
     telemetry::{get_subscriber, init_subscriber},
 };
+use once_cell::sync::Lazy;
 use reqwest::Client;
 use sqlx::{Connection, Executor, PgConnection, PgPool};
 use tokio::net::TcpListener;
 use uuid::Uuid;
 use wiremock::MockServer;
+
+static TRACING: Lazy<()> = Lazy::new(|| {
+    let subscriber = configure_subscriber();
+});
 
 pub struct TestApp {
     pub address: String,
@@ -16,7 +21,7 @@ pub struct TestApp {
 }
 
 pub async fn spawn_test_app() -> TestApp {
-    configure_subscriber();
+    Lazy::force(&TRACING);
 
     let listener = TcpListener::bind("127.0.0.1:0")
         .await
