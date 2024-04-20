@@ -16,10 +16,7 @@ use uuid::Uuid;
 
 use crate::{
     features::{
-        create_idea::handler::{cancel_idea_form, create_idea, create_idea_page, get_idea_form},
-        health_check::health_check,
-        idea_list::handler::get_ideas,
-        view_idea::handler::get_idea,
+        auth::handler::login, create_idea::handler::{cancel_idea_form, create_idea, create_idea_page, get_idea_form}, health_check::health_check, idea_list::handler::get_ideas, view_idea::handler::get_idea
     },
     AppState,
 };
@@ -67,6 +64,7 @@ pub async fn run(
         .route("/ideas/new/form", get(get_idea_form))
         .route("/ideas/new/cancel", post(cancel_idea_form))
         .route("/ideas/:id", get(get_idea))
+        .route("/login", get(login))
         .with_state(state)
         .nest_service(
             "/assets",
