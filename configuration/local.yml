@@ -2,3 +2,6 @@ application:
   host: 127.0.0.1
 database:
   require_ssl: false
+openid:
+  client_id: 541790342591-emvf08mejh5a2dd1pb8tahtidnhgl0vo.apps.googleusercontent.com
+  client_secret: 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

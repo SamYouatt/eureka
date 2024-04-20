@@ -7,6 +7,7 @@ use sqlx::ConnectOptions;
 pub struct Settings {
     pub database: DatabaseSettings,
     pub application: ApplicationSettings,
+    pub openid: OpenIdSettings,
 }
 
 #[derive(serde::Deserialize)]
@@ -25,6 +26,12 @@ pub struct DatabaseSettings {
     pub host: String,
     pub database_name: String,
     pub require_ssl: bool,
+}
+
+#[derive(serde::Deserialize)]
+pub struct OpenIdSettings {
+    pub client_id: Secret<String>,
+    pub client_secret: Secret<String>,
 }
 
 impl DatabaseSettings {
