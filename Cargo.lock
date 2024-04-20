@@ -605,6 +605,7 @@ dependencies = [
  "config",
  "maud",
  "oauth2",
+ "once_cell",
  "reqwest 0.12.3",
  "secrecy",
  "serde",
