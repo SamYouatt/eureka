@@ -41,3 +41,4 @@ features = ["runtime-tokio-rustls", "macros", "migrate", "postgres", "uuid", "ch
 
 [dev-dependencies]
 reqwest = "0.12.3"
+wiremock = "0.6.0"
