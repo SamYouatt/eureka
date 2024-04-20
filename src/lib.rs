@@ -1,3 +1,4 @@
+use reqwest::Client;
 use sqlx::PgPool;
 
 pub mod configuration;
@@ -9,4 +10,5 @@ pub mod telemetry;
 #[derive(Clone)]
 pub struct AppState {
     db: PgPool,
+    http_client: Client,
 }

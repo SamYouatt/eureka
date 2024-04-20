@@ -3,6 +3,7 @@ use eureka::{
     startup::run,
     telemetry::{get_subscriber, init_subscriber},
 };
+use reqwest::Client;
 use sqlx::postgres::PgPoolOptions;
 use tokio::net::TcpListener;
 
@@ -29,10 +30,13 @@ async fn main() -> Result<(), std::io::Error> {
         configuration.application.host, configuration.application.port
     );
 
+    // Http client
+    let http_client = Client::new();
+
     let listener = TcpListener::bind(app_address)
         .await
         .expect("Failed to bind listener");
 
-    let server = run(listener, db_pool, open_id_client).await?;
+    let server = run(listener, db_pool, open_id_client, http_client).await?;
     server.await
 }

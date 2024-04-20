@@ -3,6 +3,7 @@ use eureka::{
     startup::run,
     telemetry::{get_subscriber, init_subscriber},
 };
+use reqwest::Client;
 use sqlx::{Connection, Executor, PgConnection, PgPool};
 use tokio::net::TcpListener;
 use uuid::Uuid;
@@ -27,7 +28,9 @@ pub async fn spawn_test_app() -> TestApp {
 
     let open_id_client = configuration.openid.build_client();
 
-    let server = run(listener, db_pool.clone(), open_id_client)
+    let http_client = Client::new();
+
+    let server = run(listener, db_pool.clone(), open_id_client, http_client)
         .await
         .expect("Failed to spawn server");
 

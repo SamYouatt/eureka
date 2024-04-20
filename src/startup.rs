@@ -2,6 +2,7 @@ use axum::{
     http::Request, routing::{get, post}, serve::Serve, Extension, Router
 };
 use oauth2::basic::BasicClient;
+use reqwest::Client;
 use sqlx::PgPool;
 use tokio::net::TcpListener;
 use tower::ServiceBuilder;
@@ -35,8 +36,9 @@ pub async fn run(
     listener: TcpListener,
     db_pool: PgPool,
     open_id_client: BasicClient,
+    http_client: Client,
 ) -> Result<Serve<Router, Router>, std::io::Error> {
-    let state = AppState { db: db_pool };
+    let state = AppState { db: db_pool, http_client };
 
     let assets_path = std::env::current_dir().unwrap();
 
