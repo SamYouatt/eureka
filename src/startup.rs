@@ -1,9 +1,7 @@
 use axum::{
-    http::Request,
-    routing::{get, post},
-    serve::Serve,
-    Router,
+    http::Request, routing::{get, post}, serve::Serve, Extension, Router
 };
+use oauth2::basic::BasicClient;
 use sqlx::PgPool;
 use tokio::net::TcpListener;
 use tower::ServiceBuilder;
@@ -39,6 +37,7 @@ impl MakeRequestId for MakeRequestWithTracingId {
 pub async fn run(
     listener: TcpListener,
     db_pool: PgPool,
+    open_id_client: BasicClient,
 ) -> Result<Serve<Router, Router>, std::io::Error> {
     let state = AppState { db: db_pool };
 
@@ -73,7 +72,8 @@ pub async fn run(
             "/assets",
             ServeDir::new(format!("{}/assets", assets_path.to_str().unwrap())),
         )
-        .layer(request_id_layer);
+        .layer(request_id_layer)
+        .layer(Extension(open_id_client));
 
     Ok(axum::serve(listener, app))
 }

@@ -25,7 +25,9 @@ pub async fn spawn_test_app() -> TestApp {
     configuration.database.database_name = Uuid::new_v4().to_string();
     let db_pool = configure_database(&configuration.database).await;
 
-    let server = run(listener, db_pool.clone())
+    let open_id_client = configuration.openid.build_client();
+
+    let server = run(listener, db_pool.clone(), open_id_client)
         .await
         .expect("Failed to spawn server");
 

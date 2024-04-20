@@ -20,6 +20,9 @@ async fn main() -> Result<(), std::io::Error> {
         .acquire_timeout(std::time::Duration::from_secs(3))
         .connect_lazy_with(configuration.database.with_db());
 
+    // Auth setup
+    let open_id_client = configuration.openid.build_client();
+
     // Network setup
     let app_address = format!(
         "{}:{}",
@@ -30,6 +33,6 @@ async fn main() -> Result<(), std::io::Error> {
         .await
         .expect("Failed to bind listener");
 
-    let server = run(listener, db_pool).await?;
+    let server = run(listener, db_pool, open_id_client).await?;
     server.await
 }

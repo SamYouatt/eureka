@@ -1,3 +1,5 @@
+use oauth2::basic::BasicClient;
+use oauth2::{AuthUrl, ClientId, ClientSecret, RedirectUrl, TokenUrl};
 use secrecy::{ExposeSecret, Secret};
 use serde_aux::field_attributes::deserialize_number_from_string;
 use sqlx::postgres::{PgConnectOptions, PgSslMode};
@@ -28,12 +30,6 @@ pub struct DatabaseSettings {
     pub require_ssl: bool,
 }
 
-#[derive(serde::Deserialize)]
-pub struct OpenIdSettings {
-    pub client_id: Secret<String>,
-    pub client_secret: Secret<String>,
-}
-
 impl DatabaseSettings {
     pub fn with_db(&self) -> PgConnectOptions {
         self.without_db()
@@ -53,6 +49,32 @@ impl DatabaseSettings {
             .password(self.password.expose_secret())
             .port(self.port)
             .ssl_mode(ssl_mode)
+    }
+}
+
+#[derive(serde::Deserialize)]
+pub struct OpenIdSettings {
+    pub client_id: Secret<String>,
+    pub client_secret: Secret<String>,
+}
+
+impl OpenIdSettings {
+    pub fn build_client(&self) -> BasicClient {
+        let auth_url = AuthUrl::new("https://accounts.google.com/o/oauth2/v2/auth".into())
+            .expect("Invalid auth endpoint");
+        let token_url = TokenUrl::new("https://www.googleapis.com/oauth2/v3/token".into())
+            .expect("Invalid token endpoint");
+
+        // TODO: this should use the app configuration to generate the correct value
+        let redirect_url = "http://localhost:8000/login/redirect";
+
+        BasicClient::new(
+            ClientId::new(self.client_id.expose_secret().into()),
+            Some(ClientSecret::new(self.client_secret.expose_secret().into())),
+            auth_url,
+            Some(token_url),
+        )
+        .set_redirect_uri(RedirectUrl::new(redirect_url.into()).unwrap())
     }
 }
 
