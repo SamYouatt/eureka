@@ -8,6 +8,7 @@ use reqwest::Client;
 use sqlx::{Connection, Executor, PgConnection, PgPool};
 use tokio::net::TcpListener;
 use uuid::Uuid;
+use wiremock::MockServer;
 
 pub struct TestApp {
     pub address: String,

@@ -2,9 +2,7 @@ use chrono::Utc;
 use sqlx::types::Uuid;
 use sqlx::PgPool;
 
-use crate::startup::spawn_test_app;
-
-pub mod startup;
+use crate::helpers::spawn_test_app;
 
 #[tokio::test]
 async fn can_view_idea_list() {
