@@ -1,56 +1,13 @@
-use axum_extra::extract::cookie::Key;
 use eureka::{
     configuration::{get_configuration, DatabaseSettings},
-    startup::run,
+    startup::{get_db_pool, Application},
     telemetry::{get_subscriber, init_subscriber},
 };
 use once_cell::sync::Lazy;
-use reqwest::Client;
 use sqlx::{Connection, Executor, PgConnection, PgPool};
-use tokio::net::TcpListener;
 use uuid::Uuid;
-use wiremock::MockServer;
 
 static TRACING: Lazy<()> = Lazy::new(|| {
-    let subscriber = configure_subscriber();
-});
-
-pub struct TestApp {
-    pub address: String,
-    pub db: PgPool,
-}
-
-pub async fn spawn_test_app() -> TestApp {
-    Lazy::force(&TRACING);
-
-    let listener = TcpListener::bind("127.0.0.1:0")
-        .await
-        .expect("Failed to bind listener");
-    let port = listener.local_addr().unwrap().port();
-    let address = format!("http://127.0.0.1:{}", port);
-
-    let mut configuration = get_configuration().expect("Failed to read configuration");
-    configuration.database.database_name = Uuid::new_v4().to_string();
-    let db_pool = configure_database(&configuration.database).await;
-
-    let open_id_client = configuration.openid.build_client();
-
-    let http_client = Client::new();
-    let cookie_signing_key = Key::generate();
-
-    let server = run(listener, db_pool.clone(), open_id_client, http_client, cookie_signing_key)
-        .await
-        .expect("Failed to spawn server");
-
-    let _ = tokio::spawn(async { server.await });
-
-    TestApp {
-        address,
-        db: db_pool,
-    }
-}
-
-fn configure_subscriber() {
     let subscriber_name = "test".to_string();
     let default_filter_level = "info".to_string();
 
@@ -62,10 +19,40 @@ fn configure_subscriber() {
         let subscriber = get_subscriber(subscriber_name, default_filter_level, std::io::sink);
         init_subscriber(subscriber);
     }
+});
+
+pub struct TestApp {
+    pub address: String,
+    pub db: PgPool,
+}
+
+pub async fn spawn_test_app() -> TestApp {
+    Lazy::force(&TRACING);
+
+    // Randomise config for each test so they can be isolated
+    let configuration = {
+        let mut c = get_configuration().expect("Failed to read configuration");
+        c.database.database_name = Uuid::new_v4().to_string();
+        c.application.port = 0;
+        c
+    };
+
+    configure_and_migrate_db(&configuration.database).await;
+
+    let application = Application::build(configuration.clone())
+        .await
+        .expect("Failed to build appliaction");
+    let address = format!("http:127.0.0.1:{}", application.port());
+    let _ = tokio::spawn(application.run_until_stopped());
+
+    TestApp {
+        address,
+        db: get_db_pool(&configuration.database),
+    }
 }
 
 // Create a new database instance for each test
-async fn configure_database(config: &DatabaseSettings) -> PgPool {
+async fn configure_and_migrate_db(config: &DatabaseSettings) -> PgPool {
     let mut connection = PgConnection::connect_with(&config.without_db())
         .await
         .expect("Failed to connect to Postgres");
