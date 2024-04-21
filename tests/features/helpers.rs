@@ -6,6 +6,7 @@ use eureka::{
 use once_cell::sync::Lazy;
 use sqlx::{Connection, Executor, PgConnection, PgPool};
 use uuid::Uuid;
+use wiremock::MockServer;
 
 static TRACING: Lazy<()> = Lazy::new(|| {
     let subscriber_name = "test".to_string();
@@ -24,16 +25,22 @@ static TRACING: Lazy<()> = Lazy::new(|| {
 pub struct TestApp {
     pub address: String,
     pub db: PgPool,
+    pub open_id_client: MockServer,
 }
 
 pub async fn spawn_test_app() -> TestApp {
     Lazy::force(&TRACING);
+
+    let open_id_client = MockServer::start().await;
 
     // Randomise config for each test so they can be isolated
     let configuration = {
         let mut c = get_configuration().expect("Failed to read configuration");
         c.database.database_name = Uuid::new_v4().to_string();
         c.application.port = 0;
+        c.openid.auth_url = format!("{}/auth", open_id_client.uri());
+        c.openid.token_url = format!("{}/token", open_id_client.uri());
+        c.openid.user_info_url = format!("{}/user", open_id_client.uri());
         c
     };
 
@@ -48,6 +55,7 @@ pub async fn spawn_test_app() -> TestApp {
     TestApp {
         address,
         db: get_db_pool(&configuration.database),
+        open_id_client,
     }
 }
 
