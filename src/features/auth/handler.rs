@@ -6,10 +6,12 @@ use axum::{
     Extension,
 };
 use axum_extra::extract::{cookie::Cookie, PrivateCookieJar};
-use chrono::Local;
+use chrono::{Local, Utc};
 use oauth2::{basic::BasicClient, reqwest::async_http_client, AuthorizationCode, TokenResponse};
 use serde::Deserialize;
+use sqlx::PgPool;
 use time::Duration as TimeDuration;
+use uuid::Uuid;
 
 use crate::{configuration::OpenIdClient, AppState};
 
@@ -45,8 +47,9 @@ pub async fn login_callback(
         .send()
         .await
         .unwrap();
+    let user_info = profile.json::<UserInfo>().await.unwrap();
 
-    let _profile = profile.json::<UserInfo>().await.unwrap();
+    store_new_user(&user_info, &state.db).await.unwrap();
 
     // 1 week
     let session_max_age = 7 * 24 * 60 * 60;
@@ -59,8 +62,6 @@ pub async fn login_callback(
         .http_only(true)
         .max_age(TimeDuration::seconds(session_max_age))
         .build();
-
-    // TODO: insert the user email into the user table if necessary
 
     // TODO: insert the session token in the sessions table with its expiry for the user
 
@@ -75,4 +76,19 @@ pub async fn login(Extension(oauth_client): Extension<OpenIdClient>) -> impl Int
             .redirect_url()
             .expect("Couldn't find redirect url"),
     )
+}
+
+async fn store_new_user(user: &UserInfo, db: &PgPool) -> Result<Uuid, anyhow::Error> {
+    let user_id = Uuid::new_v4();
+
+    sqlx::query!("INSERT INTO users (id, email, created_at) VALUES ($1, $2, $3) ON CONFLICT (email) DO NOTHING",
+        user_id,
+        user.email,
+        Utc::now(),
+    )
+        .execute(db)
+        .await
+        .unwrap();
+
+    Ok(user_id)
 }
