@@ -1,6 +1,6 @@
-use wiremock::{matchers::{method, path}, Mock, ResponseTemplate};
+use wiremock::{matchers::{method, path}, Mock, MockGuard, ResponseTemplate};
 
-use crate::helpers::spawn_test_app;
+use crate::helpers::{spawn_test_app, TestApp};
 
 #[derive(serde::Serialize)]
 struct UseInfoResponse {
@@ -24,6 +24,28 @@ impl AuthTokenResponse {
     }
 }
 
+async fn configure_open_id_mock(test_app: &TestApp) -> (MockGuard, MockGuard) {
+    // These routes are mocked and not the real routes used by Google
+    let auth_token_response = ResponseTemplate::new(200).set_body_json(AuthTokenResponse::new());
+    let mock_token_exchange = Mock::given(path("/token"))
+        .and(method("POST"))
+        .respond_with(auth_token_response)
+        .named("OpenId auth token exchange")
+        .mount_as_scoped(&test_app.open_id_client)
+        .await;
+
+    let user_info_response = ResponseTemplate::new(200).set_body_json(UseInfoResponse { email: "test@test.com".into() });
+    let mock_user_info = Mock::given(path("/user"))
+        .and(method("GET"))
+        .respond_with(user_info_response)
+        .named("OpenId user info")
+        .expect(1)
+        .mount_as_scoped(&test_app.open_id_client)
+        .await;
+
+    (mock_token_exchange, mock_user_info)
+}
+
 #[tokio::test]
 async fn oauth_callback_attaches_cookie() {
     // Arrange
@@ -33,29 +55,10 @@ async fn oauth_callback_attaches_cookie() {
         .cookie_store(true)
         .build()
         .unwrap();
-
-    // These routes are mocked and not the real routes used by Google
-    let auth_token_response = ResponseTemplate::new(200).set_body_json(AuthTokenResponse::new());
-    let _mock_token_exchange = Mock::given(path("/token"))
-        .and(method("POST"))
-        .respond_with(auth_token_response)
-        .named("OpenId auth token exchange")
-        .mount_as_scoped(&test_app.open_id_client)
-        .await;
-
-    let user_info_response = ResponseTemplate::new(200).set_body_json(UseInfoResponse { email: "test@test.com".into() });
-    let _mock_user_info = Mock::given(path("/user"))
-        .and(method("GET"))
-        .respond_with(user_info_response)
-        .named("OpenId user info")
-        .expect(1)
-        .mount_as_scoped(&test_app.open_id_client)
-        .await;
-
-    let auth_code = "test_auth_code";
+    let _mock_open_id = configure_open_id_mock(&test_app).await;
 
     // Act
-    let url = format!("{}/login/redirect?code={}", test_app.address, auth_code);
+    let url = format!("{}/login/redirect?code=testauthcode", test_app.address);
     let response = client
         .get(url)
         .send()
@@ -66,3 +69,15 @@ async fn oauth_callback_attaches_cookie() {
     assert_eq!(response.status().as_u16(), 303);
     assert!(response.cookies().find(|cookie| cookie.name() == "sid").is_some());
 }
+
+// #[tokio::test]
+// async fn on_login_new_user_added_to_db() {
+//     // Arrange
+//     let test_app = spawn_test_app().await;
+//     let client = reqwest::Client::new();
+//     let url = format!
+
+//     // Act
+
+//     // Assert
+// }
