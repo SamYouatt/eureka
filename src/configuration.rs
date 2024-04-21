@@ -56,10 +56,21 @@ impl DatabaseSettings {
 pub struct OpenIdSettings {
     pub client_id: Secret<String>,
     pub client_secret: Secret<String>,
+    pub auth_url: String,
+    pub token_url: String,
+    pub user_info_url: String,
+}
+
+#[derive(Clone)]
+pub struct OpenIdClient {
+    pub client: BasicClient,
+    pub auth_url: String,
+    pub token_url: String,
+    pub user_info_url: String,
 }
 
 impl OpenIdSettings {
-    pub fn build_client(&self) -> BasicClient {
+    pub fn build_client(&self) -> OpenIdClient {
         let auth_url = AuthUrl::new("https://accounts.google.com/o/oauth2/v2/auth".into())
             .expect("Invalid auth endpoint");
         let token_url = TokenUrl::new("https://www.googleapis.com/oauth2/v3/token".into())
@@ -68,13 +79,20 @@ impl OpenIdSettings {
         // TODO: this should use the app configuration to generate the correct value
         let redirect_url = "http://localhost:8000/login/redirect";
 
-        BasicClient::new(
+        let client = BasicClient::new(
             ClientId::new(self.client_id.expose_secret().into()),
             Some(ClientSecret::new(self.client_secret.expose_secret().into())),
             auth_url,
             Some(token_url),
         )
-        .set_redirect_uri(RedirectUrl::new(redirect_url.into()).unwrap())
+        .set_redirect_uri(RedirectUrl::new(redirect_url.into()).unwrap());
+
+        OpenIdClient {
+            client,
+            auth_url: self.auth_url.to_owned(),
+            token_url: self.token_url.to_owned(),
+            user_info_url: self.user_info_url.to_owned(),
+        }
     }
 }
 

@@ -22,7 +22,7 @@ use tracing::Level;
 use uuid::Uuid;
 
 use crate::{
-    configuration::{DatabaseSettings, Settings},
+    configuration::{DatabaseSettings, OpenIdClient, Settings},
     features::{
         auth::handler::{login, login_callback},
         create_idea::handler::{cancel_idea_form, create_idea, create_idea_page, get_idea_form},
@@ -97,7 +97,7 @@ pub fn get_db_pool(configuration: &DatabaseSettings) -> PgPool {
 pub async fn run(
     listener: TcpListener,
     db_pool: PgPool,
-    open_id_client: BasicClient,
+    open_id_client: OpenIdClient,
     http_client: Client,
     cookie_signing_key: Key,
 ) -> Result<Serve<Router, Router>, std::io::Error> {
