@@ -138,14 +138,49 @@ async fn on_login_existing_user_not_added_to_db() {
     assert_eq!(created_user.count, Some(1));
 }
 
-async fn seed_user(db: &PgPool, email: &str) {
+#[tokio::test]
+async fn on_login_should_insert_session_to_db() {
+    // Arrange
+    let test_app = spawn_test_app().await;
+    let client = reqwest::Client::new();
+    let _mock_open_id = configure_open_id_mock(&test_app).await;
+
+    let user_id = seed_user(&test_app.db, "test@test.com").await;
+
+    // Act
+    let url = format!("{}/login/redirect?code=testauthcode", test_app.address);
+    let response = client
+        .get(url)
+        .send()
+        .await
+        .expect("Failed to execute request");
+
+    // Assert
+    assert!(response.status().is_success());
+
+    let created_user = sqlx::query!(
+        "SELECT COUNT(*) FROM sessions WHERE user_id = $1",
+        user_id,
+    )
+    .fetch_one(&test_app.db)
+    .await
+    .expect("Failed to fetch new user");
+
+    assert_eq!(created_user.count, Some(1));
+}
+
+async fn seed_user(db: &PgPool, email: &str) -> Uuid {
+    let user_id = Uuid::new_v4();
+
     sqlx::query!(
         "INSERT INTO users (id, email, created_at) VALUES ($1, $2, $3)",
-        Uuid::new_v4(),
+        user_id,
         email,
         Utc::now(),
     )
     .execute(db)
     .await
     .unwrap();
+
+    user_id
 }
