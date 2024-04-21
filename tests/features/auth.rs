@@ -106,3 +106,46 @@ async fn on_login_new_user_added_to_db() {
 
     assert_eq!(created_user.email, "test@test.com");
 }
+
+#[tokio::test]
+async fn on_login_existing_user_not_added_to_db() {
+    // Arrange
+    let test_app = spawn_test_app().await;
+    let client = reqwest::Client::new();
+    let _mock_open_id = configure_open_id_mock(&test_app).await;
+
+    seed_user(&test_app.db, "test@test.com").await;
+
+    // Act
+    let url = format!("{}/login/redirect?code=testauthcode", test_app.address);
+    let response = client
+        .get(url)
+        .send()
+        .await
+        .expect("Failed to execute request");
+
+    // Assert
+    assert!(response.status().is_success());
+
+    let created_user = sqlx::query!(
+        "SELECT COUNT(*) FROM users WHERE email = $1",
+        "test@test.com"
+    )
+    .fetch_one(&test_app.db)
+    .await
+    .expect("Failed to fetch new user");
+
+    assert_eq!(created_user.count, Some(1));
+}
+
+async fn seed_user(db: &PgPool, email: &str) {
+    sqlx::query!(
+        "INSERT INTO users (id, email, created_at) VALUES ($1, $2, $3)",
+        Uuid::new_v4(),
+        email,
+        Utc::now(),
+    )
+    .execute(db)
+    .await
+    .unwrap();
+}
