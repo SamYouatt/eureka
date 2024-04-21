@@ -6,7 +6,7 @@ use axum::{
     Extension,
 };
 use axum_extra::extract::{cookie::Cookie, PrivateCookieJar};
-use chrono::{Local, Utc};
+use chrono::{DateTime, Local, NaiveDateTime, Utc};
 use oauth2::{basic::BasicClient, reqwest::async_http_client, AuthorizationCode, TokenResponse};
 use serde::Deserialize;
 use sqlx::PgPool;
@@ -53,7 +53,9 @@ pub async fn login_callback(
 
     // 1 week
     let session_max_age = 7 * 24 * 60 * 60;
-    let _token_max_age = Local::now().naive_utc() + chrono::Duration::seconds(session_max_age);
+    let token_max_age = Utc::now() + chrono::Duration::seconds(session_max_age);
+
+    store_new_session(&user_info, auth_token.access_token().secret(), token_max_age, &state.db).await.unwrap();
 
     let session_cookie = Cookie::build(("sid", auth_token.access_token().secret().to_owned()))
         .domain(".localhost")
@@ -62,8 +64,6 @@ pub async fn login_callback(
         .http_only(true)
         .max_age(TimeDuration::seconds(session_max_age))
         .build();
-
-    // TODO: insert the session token in the sessions table with its expiry for the user
 
     (cookie_jar.add(session_cookie), Redirect::to("/"))
 }
@@ -78,7 +78,25 @@ pub async fn login(Extension(oauth_client): Extension<OpenIdClient>) -> impl Int
     )
 }
 
-async fn store_new_user(user: &UserInfo, db: &PgPool) -> Result<Uuid, anyhow::Error> {
+async fn store_new_session(user: &UserInfo, session_id: &str, expires_at: DateTime<Utc>, db: &PgPool) -> Result<(), anyhow::Error> {
+    sqlx::query!(
+        "INSERT INTO sessions (user_id, session_id, expires_at) VALUES (
+                (SELECT ID FROM users WHERE email = $1 LIMIT 1), $2, $3)
+                 ON CONFLICT (user_id) DO UPDATE SET
+                 session_id = EXCLUDED.session_id,
+                 expires_at = EXCLUDED.expires_at",
+        &user.email,
+        session_id,
+        expires_at
+    )
+    .execute(db)
+    .await
+    .unwrap();
+
+    Ok(())
+}
+
+async fn store_new_user(user: &UserInfo, db: &PgPool) -> Result<(), anyhow::Error> {
     let user_id = Uuid::new_v4();
 
     sqlx::query!("INSERT INTO users (id, email, created_at) VALUES ($1, $2, $3) ON CONFLICT (email) DO NOTHING",
@@ -90,5 +108,5 @@ async fn store_new_user(user: &UserInfo, db: &PgPool) -> Result<Uuid, anyhow::Er
         .await
         .unwrap();
 
-    Ok(user_id)
+    Ok(())
 }
