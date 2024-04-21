@@ -81,3 +81,8 @@ async fn configure_and_migrate_db(config: &DatabaseSettings) -> PgPool {
 
     db_pool
 }
+
+pub fn assert_redirect_to(response: &reqwest::Response, location: &str) {
+    assert_eq!(response.status().as_u16(), 303);
+    assert_eq!(response.headers().get("Location").unwrap(), location);
+}

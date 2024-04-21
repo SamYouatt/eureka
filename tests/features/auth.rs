@@ -6,7 +6,7 @@ use wiremock::{
     Mock, MockGuard, ResponseTemplate,
 };
 
-use crate::helpers::{spawn_test_app, TestApp};
+use crate::helpers::{spawn_test_app, assert_redirect_to, TestApp};
 
 #[derive(serde::Serialize)]
 struct UseInfoResponse {
@@ -167,6 +167,24 @@ async fn on_login_should_insert_session_to_db() {
     .expect("Failed to fetch new user");
 
     assert_eq!(created_user.count, Some(1));
+}
+
+#[tokio::test]
+async fn without_session_should_redircect_to_login() {
+    // Arrange
+    let test_app = spawn_test_app().await;
+    let client = reqwest::Client::new();
+
+    // Act
+    let url = format!("{}/", test_app.address);
+    let response = client
+        .get(url)
+        .send()
+        .await
+        .expect("Failed to execute request");
+
+    // Assert
+    assert_redirect_to(&response, "/login");
 }
 
 async fn seed_user(db: &PgPool, email: &str) -> Uuid {
