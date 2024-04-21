@@ -1,13 +1,11 @@
-use anyhow::anyhow;
 use axum::{
     extract::{Query, State},
-    http::StatusCode,
     response::{IntoResponse, Redirect},
     Extension,
 };
 use axum_extra::extract::{cookie::Cookie, PrivateCookieJar};
-use chrono::{DateTime, Local, NaiveDateTime, Utc};
-use oauth2::{basic::BasicClient, reqwest::async_http_client, AuthorizationCode, TokenResponse};
+use chrono::{DateTime, Utc};
+use oauth2::{reqwest::async_http_client, AuthorizationCode, TokenResponse};
 use serde::Deserialize;
 use sqlx::PgPool;
 use time::Duration as TimeDuration;
@@ -16,6 +14,8 @@ use uuid::Uuid;
 use crate::{configuration::OpenIdClient, AppState};
 
 use super::views::login_button;
+
+const SESSION_MAX_AGE: i64 = 7 * 24 * 60 * 60; // 1 week
 
 #[derive(Deserialize, Debug)]
 pub struct AuthRequest {
@@ -49,20 +49,20 @@ pub async fn login_callback(
         .unwrap();
     let user_info = profile.json::<UserInfo>().await.unwrap();
 
-    store_new_user(&user_info, &state.db).await.unwrap();
+    upsert_user(&user_info, &state.db).await.unwrap();
 
-    // 1 week
-    let session_max_age = 7 * 24 * 60 * 60;
-    let token_max_age = Utc::now() + chrono::Duration::seconds(session_max_age);
+    let token_max_age = Utc::now() + chrono::Duration::seconds(SESSION_MAX_AGE);
 
-    store_new_session(&user_info, auth_token.access_token().secret(), token_max_age, &state.db).await.unwrap();
+    let session_id = auth_token.access_token().secret();
 
-    let session_cookie = Cookie::build(("sid", auth_token.access_token().secret().to_owned()))
+    upsert_session(&user_info, &session_id, token_max_age, &state.db).await.unwrap();
+
+    let session_cookie = Cookie::build(("sid", session_id.to_owned()))
         .domain(".localhost")
         .path("/")
         .secure(true)
         .http_only(true)
-        .max_age(TimeDuration::seconds(session_max_age))
+        .max_age(TimeDuration::seconds(SESSION_MAX_AGE))
         .build();
 
     (cookie_jar.add(session_cookie), Redirect::to("/"))
@@ -78,7 +78,7 @@ pub async fn login(Extension(oauth_client): Extension<OpenIdClient>) -> impl Int
     )
 }
 
-async fn store_new_session(user: &UserInfo, session_id: &str, expires_at: DateTime<Utc>, db: &PgPool) -> Result<(), anyhow::Error> {
+async fn upsert_session(user: &UserInfo, session_id: &str, expires_at: DateTime<Utc>, db: &PgPool) -> Result<(), anyhow::Error> {
     sqlx::query!(
         "INSERT INTO sessions (user_id, session_id, expires_at) VALUES (
                 (SELECT ID FROM users WHERE email = $1 LIMIT 1), $2, $3)
@@ -96,7 +96,7 @@ async fn store_new_session(user: &UserInfo, session_id: &str, expires_at: DateTi
     Ok(())
 }
 
-async fn store_new_user(user: &UserInfo, db: &PgPool) -> Result<(), anyhow::Error> {
+async fn upsert_user(user: &UserInfo, db: &PgPool) -> Result<(), anyhow::Error> {
     let user_id = Uuid::new_v4();
 
     sqlx::query!("INSERT INTO users (id, email, created_at) VALUES ($1, $2, $3) ON CONFLICT (email) DO NOTHING",
