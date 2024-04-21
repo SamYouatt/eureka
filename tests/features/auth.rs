@@ -1,4 +1,10 @@
-use wiremock::{matchers::{method, path}, Mock, MockGuard, ResponseTemplate};
+use sqlx::types::Uuid;
+use chrono::Utc;
+use sqlx::PgPool;
+use wiremock::{
+    matchers::{method, path},
+    Mock, MockGuard, ResponseTemplate,
+};
 
 use crate::helpers::{spawn_test_app, TestApp};
 
@@ -34,7 +40,9 @@ async fn configure_open_id_mock(test_app: &TestApp) -> (MockGuard, MockGuard) {
         .mount_as_scoped(&test_app.open_id_client)
         .await;
 
-    let user_info_response = ResponseTemplate::new(200).set_body_json(UseInfoResponse { email: "test@test.com".into() });
+    let user_info_response = ResponseTemplate::new(200).set_body_json(UseInfoResponse {
+        email: "test@test.com".into(),
+    });
     let mock_user_info = Mock::given(path("/user"))
         .and(method("GET"))
         .respond_with(user_info_response)
@@ -67,17 +75,34 @@ async fn oauth_callback_attaches_cookie() {
 
     // Assert
     assert_eq!(response.status().as_u16(), 303);
-    assert!(response.cookies().find(|cookie| cookie.name() == "sid").is_some());
+    assert!(response
+        .cookies()
+        .find(|cookie| cookie.name() == "sid")
+        .is_some());
 }
 
-// #[tokio::test]
-// async fn on_login_new_user_added_to_db() {
-//     // Arrange
-//     let test_app = spawn_test_app().await;
-//     let client = reqwest::Client::new();
-//     let url = format!
+#[tokio::test]
+async fn on_login_new_user_added_to_db() {
+    // Arrange
+    let test_app = spawn_test_app().await;
+    let client = reqwest::Client::new();
+    let _mock_open_id = configure_open_id_mock(&test_app).await;
 
-//     // Act
+    // Act
+    let url = format!("{}/login/redirect?code=testauthcode", test_app.address);
+    let response = client
+        .get(url)
+        .send()
+        .await
+        .expect("Failed to execute request");
 
-//     // Assert
-// }
+    // Assert
+    assert!(response.status().is_success());
+
+    let created_user = sqlx::query!("SELECT email FROM users WHERE email = $1", "test@test.com")
+        .fetch_one(&test_app.db)
+        .await
+        .expect("Failed to fetch new user");
+
+    assert_eq!(created_user.email, "test@test.com");
+}
