@@ -40,7 +40,7 @@ pub async fn login_callback(
 
     let profile = state
         .http_client
-        .get("https://openidconnect.googleapis.com/v1/userinfo")
+        .get(oauth_client.user_info_url)
         .bearer_auth(auth_token.access_token().secret())
         .send()
         .await

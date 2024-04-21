@@ -71,9 +71,9 @@ pub struct OpenIdClient {
 
 impl OpenIdSettings {
     pub fn build_client(&self) -> OpenIdClient {
-        let auth_url = AuthUrl::new("https://accounts.google.com/o/oauth2/v2/auth".into())
+        let auth_url = AuthUrl::new(self.auth_url.to_owned())
             .expect("Invalid auth endpoint");
-        let token_url = TokenUrl::new("https://www.googleapis.com/oauth2/v3/token".into())
+        let token_url = TokenUrl::new(self.token_url.to_owned())
             .expect("Invalid token endpoint");
 
         // TODO: this should use the app configuration to generate the correct value
