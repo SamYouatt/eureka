@@ -26,6 +26,7 @@ pub struct TestApp {
     pub address: String,
     pub db: PgPool,
     pub open_id_client: MockServer,
+    pub client: reqwest::Client,
 }
 
 pub async fn spawn_test_app() -> TestApp {
@@ -46,6 +47,12 @@ pub async fn spawn_test_app() -> TestApp {
 
     configure_and_migrate_db(&configuration.database).await;
 
+    let client = reqwest::Client::builder()
+        .redirect(reqwest::redirect::Policy::none())
+        .cookie_store(true)
+        .build()
+        .unwrap();
+
     let application = Application::build(configuration.clone())
         .await
         .expect("Failed to build appliaction");
@@ -56,6 +63,7 @@ pub async fn spawn_test_app() -> TestApp {
         address,
         db: get_db_pool(&configuration.database),
         open_id_client,
+        client,
     }
 }
 
@@ -129,11 +137,11 @@ pub async fn configure_open_id_mock(test_app: &TestApp) -> (MockGuard, MockGuard
 }
 
 // Creates a loggen in user with session cookie
-pub async fn run_login(client: &reqwest::Client, test_app: &TestApp) {
+pub async fn run_login(test_app: &TestApp) {
     let _mock_open_id = configure_open_id_mock(test_app).await;
 
     let url = format!("{}/login/redirect?code=testauthcode", test_app.address);
-    let _response = &client
+    let _response = &test_app.client
         .get(url)
         .send()
         .await
