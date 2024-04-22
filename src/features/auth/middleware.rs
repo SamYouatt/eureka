@@ -1,7 +1,5 @@
 use axum::{
-    extract::{FromRequest, FromRequestParts, Request, State},
-    middleware::Next,
-    response::{IntoResponse, Redirect},
+    extract::{FromRequest, FromRequestParts, Request, State}, http::request::Parts, middleware::Next, response::{IntoResponse, Redirect}
 };
 use axum_extra::extract::PrivateCookieJar;
 use sqlx::PgPool;
@@ -23,13 +21,11 @@ impl IntoResponse for AuthError {
 // Extractor to get the app user
 // Will reject if the user is not already logged in
 #[axum::async_trait]
-impl FromRequest<AppState> for AppUser {
+impl FromRequestParts<AppState> for AppUser {
     type Rejection = AuthError;
 
-    async fn from_request(req: Request, state: &AppState) -> Result<Self, Self::Rejection> {
-        let (mut parts, _body) = req.into_parts();
-
-        let cookie_jar: PrivateCookieJar = PrivateCookieJar::from_request_parts(&mut parts, state)
+    async fn from_request_parts(parts: &mut Parts, state: &AppState) -> Result<Self, Self::Rejection> {
+        let cookie_jar: PrivateCookieJar = PrivateCookieJar::from_request_parts(parts, state)
             .await
             .unwrap();
 
@@ -85,7 +81,7 @@ async fn get_user_from_session(
 ) -> Result<Option<AppUser>, AuthError> {
     let query = sqlx::query_as!(
             AppUser,
-            "SELECT users.email FROM sessions LEFT JOIN users ON sessions.user_id = users.id WHERE sessions.session_id = $1 LIMIT 1",
+            "SELECT users.email, users.id FROM sessions LEFT JOIN users ON sessions.user_id = users.id WHERE sessions.session_id = $1 LIMIT 1",
             session_cookie,
             )
             .fetch_optional(db);
