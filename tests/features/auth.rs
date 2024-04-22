@@ -13,7 +13,7 @@ async fn oauth_callback_attaches_cookie() {
         .cookie_store(true)
         .build()
         .unwrap();
-    let _mock_open_id = configure_open_id_mock(&test_app).await;
+    let _mock_open_id = configure_open_id_mock("test@test.com", &test_app).await;
 
     // Act
     let url = format!("{}/login/redirect?code=testauthcode", test_app.address);
@@ -36,7 +36,7 @@ async fn on_login_new_user_added_to_db() {
     // Arrange
     let test_app = spawn_test_app().await;
     let client = reqwest::Client::new();
-    let _mock_open_id = configure_open_id_mock(&test_app).await;
+    let _mock_open_id = configure_open_id_mock("test@test.com", &test_app).await;
 
     // Act
     let url = format!("{}/login/redirect?code=testauthcode", test_app.address);
@@ -62,7 +62,7 @@ async fn on_login_existing_user_not_added_to_db() {
     // Arrange
     let test_app = spawn_test_app().await;
     let client = reqwest::Client::new();
-    let _mock_open_id = configure_open_id_mock(&test_app).await;
+    let _mock_open_id = configure_open_id_mock("test@test.com", &test_app).await;
 
     seed_user(&test_app.db, "test@test.com").await;
 
@@ -93,7 +93,7 @@ async fn on_login_should_insert_session_to_db() {
     // Arrange
     let test_app = spawn_test_app().await;
     let client = reqwest::Client::new();
-    let _mock_open_id = configure_open_id_mock(&test_app).await;
+    let _mock_open_id = configure_open_id_mock("test@test.com", &test_app).await;
 
     let user_id = seed_user(&test_app.db, "test@test.com").await;
 

@@ -112,7 +112,7 @@ impl AuthTokenResponse {
     }
 }
 
-pub async fn configure_open_id_mock(test_app: &TestApp) -> (MockGuard, MockGuard) {
+pub async fn configure_open_id_mock(email: &str, test_app: &TestApp) -> (MockGuard, MockGuard) {
     // These routes are mocked and not the real routes used by Google
     let auth_token_response = ResponseTemplate::new(200).set_body_json(AuthTokenResponse::new());
     let mock_token_exchange = Mock::given(path("/token"))
@@ -123,7 +123,7 @@ pub async fn configure_open_id_mock(test_app: &TestApp) -> (MockGuard, MockGuard
         .await;
 
     let user_info_response = ResponseTemplate::new(200).set_body_json(UseInfoResponse {
-        email: "test@test.com".into(),
+        email: email.into(),
     });
     let mock_user_info = Mock::given(path("/user"))
         .and(method("GET"))
@@ -136,9 +136,9 @@ pub async fn configure_open_id_mock(test_app: &TestApp) -> (MockGuard, MockGuard
     (mock_token_exchange, mock_user_info)
 }
 
-// Creates a loggen in user with session cookie
-pub async fn create_user_session(test_app: &TestApp) {
-    let _mock_open_id = configure_open_id_mock(test_app).await;
+// Creates a loggen in user with session cookie and returns the user id
+pub async fn create_user_session(email: &str, test_app: &TestApp) -> Uuid {
+    let _mock_open_id = configure_open_id_mock(email, test_app).await;
 
     let url = format!("{}/login/redirect?code=testauthcode", test_app.address);
     let _response = &test_app.client
@@ -146,6 +146,13 @@ pub async fn create_user_session(test_app: &TestApp) {
         .send()
         .await
         .expect("Failed to execute request");
+
+    let user_id = sqlx::query!("SELECT id FROM users WHERE email = $1", email)
+        .fetch_one(&test_app.db)
+        .await
+        .unwrap();
+
+    user_id.id
 }
 
 pub fn assert_redirect_to(response: &reqwest::Response, location: &str) {
