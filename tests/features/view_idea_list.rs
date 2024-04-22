@@ -2,18 +2,19 @@ use chrono::Utc;
 use sqlx::types::Uuid;
 use sqlx::PgPool;
 
-use crate::helpers::spawn_test_app;
+use crate::helpers::{run_login, spawn_test_app};
 
 #[tokio::test]
 async fn can_view_idea_list() {
     // Arrange
     let test_app = spawn_test_app().await;
-    let client = reqwest::Client::new();
+    run_login(&test_app).await;
     seed_ideas(&test_app.db).await;
 
     // Act
     let url = format!("{}/", test_app.address);
-    let response = client
+    let response = test_app
+        .client
         .get(url)
         .send()
         .await

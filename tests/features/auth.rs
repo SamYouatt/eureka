@@ -1,9 +1,8 @@
-use sqlx::types::Uuid;
 use chrono::Utc;
+use sqlx::types::Uuid;
 use sqlx::PgPool;
 
 use crate::helpers::{assert_redirect_to, configure_open_id_mock, spawn_test_app};
-
 
 #[tokio::test]
 async fn oauth_callback_attaches_cookie() {
@@ -109,13 +108,10 @@ async fn on_login_should_insert_session_to_db() {
     // Assert
     assert!(response.status().is_success());
 
-    let created_user = sqlx::query!(
-        "SELECT COUNT(*) FROM sessions WHERE user_id = $1",
-        user_id,
-    )
-    .fetch_one(&test_app.db)
-    .await
-    .expect("Failed to fetch new user");
+    let created_user = sqlx::query!("SELECT COUNT(*) FROM sessions WHERE user_id = $1", user_id,)
+        .fetch_one(&test_app.db)
+        .await
+        .expect("Failed to fetch new user");
 
     assert_eq!(created_user.count, Some(1));
 }
@@ -124,11 +120,11 @@ async fn on_login_should_insert_session_to_db() {
 async fn without_session_should_redircect_to_login() {
     // Arrange
     let test_app = spawn_test_app().await;
-    let client = reqwest::Client::new();
 
     // Act
     let url = format!("{}/", test_app.address);
-    let response = client
+    let response = test_app
+        .client
         .get(url)
         .send()
         .await

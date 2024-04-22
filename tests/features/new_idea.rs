@@ -1,17 +1,17 @@
-use crate::helpers::spawn_test_app;
+use crate::helpers::{run_login, spawn_test_app};
 
 #[tokio::test]
 async fn can_creat_new_idea() {
     // Arrange
     let test_app = spawn_test_app().await;
-
-    let client = reqwest::Client::new();
-    let url = format!("{}/ideas/new", test_app.address);
+    run_login(&test_app).await;
 
     let body = "name=Test%20Idea&tagline=Just%20Testing";
 
     // Act
-    let response = client
+    let url = format!("{}/ideas/new", test_app.address);
+    let response = test_app
+        .client
         .post(url)
         .header("Content-Type", "application/x-www-form-urlencoded")
         .body(body)

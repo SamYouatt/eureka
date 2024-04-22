@@ -40,19 +40,22 @@ impl FromRequest<AppState> for AppUser {
             return Err(AuthError::NoSessionCookie);
         };
 
-        get_user_from_session(&session_cookie, &state.db).await?.ok_or(AuthError::NoMatchingUserForSession)
+        get_user_from_session(&session_cookie, &state.db)
+            .await?
+            .ok_or(AuthError::NoMatchingUserForSession)
     }
 }
 
 pub async fn require_session(
     State(state): State<AppState>,
-    cookie_jar: PrivateCookieJar,
     request: Request,
     next: Next,
 ) -> impl IntoResponse {
-    let redirect_to_login = || {
-        Redirect::to("/login").into_response()
-    };
+    let redirect_to_login = || Redirect::to("/login").into_response();
+
+    let (parts, body) = request.into_parts();
+
+    let cookie_jar: PrivateCookieJar = PrivateCookieJar::from_headers(&parts.headers, state.cookie_signing_key);
 
     let Some(session_cookie) = cookie_jar
         .get("sid")
@@ -63,11 +66,12 @@ pub async fn require_session(
 
     match get_user_from_session(&session_cookie, &state.db).await {
         Ok(Some(_)) => {
-            next.run(request).await
+            println!("Found user from session");
+            let request = Request::from_parts(parts, body);
+            let response = next.run(request).await;
+            response
         }
-        Ok(None) => {
-            redirect_to_login()
-        }
+        Ok(None) => redirect_to_login(),
         Err(_) => {
             // TODO: error message to user here instead
             redirect_to_login()
