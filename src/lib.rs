@@ -13,7 +13,8 @@ pub mod telemetry;
 pub struct AppState {
     db: PgPool,
     http_client: Client,
-    cookie_signing_key: Key
+    cookie_signing_key: Key,
+    domain: String,
 }
 
 impl FromRef<AppState> for Key {

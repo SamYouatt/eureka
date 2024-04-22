@@ -58,7 +58,7 @@ pub async fn login_callback(
     upsert_session(&user_info, &session_id, token_max_age, &state.db).await.unwrap();
 
     let session_cookie = Cookie::build(("sid", session_id.to_owned()))
-        .domain(".localhost")
+        .domain(format!(".{}", state.domain))
         .path("/")
         .secure(true)
         .http_only(true)

@@ -49,7 +49,7 @@ impl Application {
     pub async fn build(configuration: Settings) -> Result<Self, Error> {
         let db_pool = get_db_pool(&configuration.database);
 
-        let open_id_client = configuration.openid.build_client();
+        let open_id_client = configuration.openid.build_client(&configuration);
 
         let app_address = format!(
             "{}:{}",
@@ -70,6 +70,7 @@ impl Application {
             open_id_client,
             http_client,
             cookie_signing_key,
+            configuration.application.domain,
         )
         .await?;
 
@@ -97,11 +98,13 @@ pub async fn run(
     open_id_client: OpenIdClient,
     http_client: Client,
     cookie_signing_key: Key,
+    domain: String,
 ) -> Result<Serve<Router, Router>, std::io::Error> {
     let state = AppState {
         db: db_pool,
         http_client,
         cookie_signing_key,
+        domain
     };
 
     let assets_path = std::env::current_dir().unwrap();
