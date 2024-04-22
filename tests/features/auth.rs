@@ -25,9 +25,7 @@ async fn oauth_callback_attaches_cookie() {
 
     // Assert
     assert_eq!(response.status().as_u16(), 303);
-    assert!(response
-        .cookies()
-        .any(|cookie| cookie.name() == "sid"));
+    assert!(response.cookies().any(|cookie| cookie.name() == "sid"));
 }
 
 #[tokio::test]

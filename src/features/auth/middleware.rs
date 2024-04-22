@@ -71,7 +71,7 @@ pub async fn require_session(
         Ok(Some(_)) => {
             println!("Found user from session");
             let request = Request::from_parts(parts, body);
-            
+
             next.run(request).await
         }
         Ok(None) => redirect_to_login(),
