@@ -2,7 +2,7 @@ use chrono::Utc;
 use sqlx::types::Uuid;
 use sqlx::PgPool;
 
-use crate::helpers::{create_user_session, spawn_test_app};
+use crate::helpers::{create_user_session, seed_user, spawn_test_app};
 
 #[tokio::test]
 async fn can_view_idea() {
@@ -50,18 +50,6 @@ async fn cannot_view_another_user_idea() {
 
     // Assert
     assert_eq!(response.status().as_u16(), 401);
-}
-
-async fn seed_user(user_id: Uuid, email: &str, db: &PgPool) {
-    sqlx::query!(
-        "INSERT INTO users (id, email, created_at) VALUES ($1, $2, $3)",
-        user_id,
-        email,
-        Utc::now(),
-    )
-    .execute(db)
-    .await
-    .unwrap();
 }
 
 async fn seed_idea(db: &PgPool, title: &str, tagline: &str, user_id: Uuid) -> Uuid {

@@ -3,6 +3,7 @@ use eureka::{
     startup::{get_db_pool, Application},
     telemetry::{get_subscriber, init_subscriber},
 };
+use chrono::Utc;
 use once_cell::sync::Lazy;
 use sqlx::{Connection, Executor, PgConnection, PgPool};
 use uuid::Uuid;
@@ -153,6 +154,18 @@ pub async fn create_user_session(email: &str, test_app: &TestApp) -> Uuid {
         .unwrap();
 
     user_id.id
+}
+
+pub async fn seed_user(user_id: Uuid, email: &str, db: &PgPool) {
+    sqlx::query!(
+        "INSERT INTO users (id, email, created_at) VALUES ($1, $2, $3)",
+        user_id,
+        email,
+        Utc::now(),
+    )
+    .execute(db)
+    .await
+    .unwrap();
 }
 
 pub fn assert_redirect_to(response: &reqwest::Response, location: &str) {
