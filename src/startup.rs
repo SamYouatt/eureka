@@ -1,7 +1,11 @@
 use std::io::Error;
 
 use axum::{
-    http::Request, middleware, routing::{get, post}, serve::Serve, Extension, Router
+    http::Request,
+    middleware,
+    routing::{get, post},
+    serve::Serve,
+    Extension, Router,
 };
 use axum_extra::extract::cookie::Key;
 use oauth2::basic::BasicClient;
@@ -21,7 +25,10 @@ use uuid::Uuid;
 use crate::{
     configuration::{DatabaseSettings, OpenIdClient, Settings},
     features::{
-        auth::{handler::{login, login_callback}, middleware::require_session},
+        auth::{
+            handler::{login, login_callback},
+            middleware::require_session,
+        },
         create_idea::handler::{cancel_idea_form, create_idea, create_idea_page, get_idea_form},
         health_check::health_check,
         idea_list::handler::get_ideas,
@@ -104,7 +111,7 @@ pub async fn run(
         db: db_pool,
         http_client,
         cookie_signing_key,
-        domain
+        domain,
     };
 
     let assets_path = std::env::current_dir().unwrap();
@@ -132,7 +139,10 @@ pub async fn run(
         .route("/ideas/new/form", get(get_idea_form))
         .route("/ideas/new/cancel", post(cancel_idea_form))
         .route("/ideas/:id", get(get_idea))
-        .route_layer(middleware::from_fn_with_state(state.clone(), require_session));
+        .route_layer(middleware::from_fn_with_state(
+            state.clone(),
+            require_session,
+        ));
 
     let unprotected_router = Router::new()
         .route("/health_check", get(health_check))

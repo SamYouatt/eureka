@@ -73,14 +73,15 @@ pub struct OpenIdClient {
 
 impl OpenIdSettings {
     pub fn build_client(&self, settings: &Settings) -> OpenIdClient {
-        let auth_url = AuthUrl::new(self.auth_url.to_owned())
-            .expect("Invalid auth endpoint");
-        let token_url = TokenUrl::new(self.token_url.to_owned())
-            .expect("Invalid token endpoint");
+        let auth_url = AuthUrl::new(self.auth_url.to_owned()).expect("Invalid auth endpoint");
+        let token_url = TokenUrl::new(self.token_url.to_owned()).expect("Invalid token endpoint");
 
         let redirect_url = match settings.application.https {
             true => format!("https://{}/login/redirect", settings.application.domain),
-            false => format!("http://{}:{}/login/redirect", settings.application.domain, settings.application.port),
+            false => format!(
+                "http://{}:{}/login/redirect",
+                settings.application.domain, settings.application.port
+            ),
         };
 
         let client = BasicClient::new(

@@ -1,5 +1,7 @@
 use eureka::{
-    configuration::get_configuration, startup::Application, telemetry::{get_subscriber, init_subscriber}
+    configuration::get_configuration,
+    startup::Application,
+    telemetry::{get_subscriber, init_subscriber},
 };
 
 #[tokio::main]

@@ -1,13 +1,16 @@
+use chrono::Utc;
 use eureka::{
     configuration::{get_configuration, DatabaseSettings},
     startup::{get_db_pool, Application},
     telemetry::{get_subscriber, init_subscriber},
 };
-use chrono::Utc;
 use once_cell::sync::Lazy;
 use sqlx::{Connection, Executor, PgConnection, PgPool};
 use uuid::Uuid;
-use wiremock::{matchers::{method, path}, Mock, MockGuard, MockServer, ResponseTemplate};
+use wiremock::{
+    matchers::{method, path},
+    Mock, MockGuard, MockServer, ResponseTemplate,
+};
 
 static TRACING: Lazy<()> = Lazy::new(|| {
     let subscriber_name = "test".to_string();
@@ -57,7 +60,11 @@ pub async fn spawn_test_app() -> TestApp {
     let application = Application::build(configuration.clone())
         .await
         .expect("Failed to build appliaction");
-    let address = format!("http://{}:{}", configuration.application.domain, application.port());
+    let address = format!(
+        "http://{}:{}",
+        configuration.application.domain,
+        application.port()
+    );
     let _ = tokio::spawn(application.run_until_stopped());
 
     TestApp {
@@ -142,7 +149,8 @@ pub async fn create_user_session(email: &str, test_app: &TestApp) -> Uuid {
     let _mock_open_id = configure_open_id_mock(email, test_app).await;
 
     let url = format!("{}/login/redirect?code=testauthcode", test_app.address);
-    let _response = &test_app.client
+    let _response = &test_app
+        .client
         .get(url)
         .send()
         .await

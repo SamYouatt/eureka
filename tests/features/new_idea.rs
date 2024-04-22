@@ -22,10 +22,13 @@ async fn can_create_new_idea() {
     // Assert
     assert!(response.status().is_success());
 
-    let created_idea = sqlx::query!("SELECT title, tagline FROM ideas WHERE user_id = $1", user_id)
-        .fetch_one(&test_app.db)
-        .await
-        .expect("Failed to fetch saved idea");
+    let created_idea = sqlx::query!(
+        "SELECT title, tagline FROM ideas WHERE user_id = $1",
+        user_id
+    )
+    .fetch_one(&test_app.db)
+    .await
+    .expect("Failed to fetch saved idea");
 
     assert_eq!(created_idea.title, "Test Idea");
     assert_eq!(created_idea.tagline, "Just Testing");

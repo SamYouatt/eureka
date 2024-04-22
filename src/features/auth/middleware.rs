@@ -1,5 +1,8 @@
 use axum::{
-    extract::{FromRequest, FromRequestParts, Request, State}, http::request::Parts, middleware::Next, response::{IntoResponse, Redirect}
+    extract::{FromRequest, FromRequestParts, Request, State},
+    http::request::Parts,
+    middleware::Next,
+    response::{IntoResponse, Redirect},
 };
 use axum_extra::extract::PrivateCookieJar;
 use sqlx::PgPool;
@@ -24,7 +27,10 @@ impl IntoResponse for AuthError {
 impl FromRequestParts<AppState> for AppUser {
     type Rejection = AuthError;
 
-    async fn from_request_parts(parts: &mut Parts, state: &AppState) -> Result<Self, Self::Rejection> {
+    async fn from_request_parts(
+        parts: &mut Parts,
+        state: &AppState,
+    ) -> Result<Self, Self::Rejection> {
         let cookie_jar: PrivateCookieJar = PrivateCookieJar::from_request_parts(parts, state)
             .await
             .unwrap();
@@ -51,7 +57,8 @@ pub async fn require_session(
 
     let (parts, body) = request.into_parts();
 
-    let cookie_jar: PrivateCookieJar = PrivateCookieJar::from_headers(&parts.headers, state.cookie_signing_key);
+    let cookie_jar: PrivateCookieJar =
+        PrivateCookieJar::from_headers(&parts.headers, state.cookie_signing_key);
 
     let Some(session_cookie) = cookie_jar
         .get("sid")

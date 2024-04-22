@@ -55,7 +55,9 @@ pub async fn login_callback(
 
     let session_id = auth_token.access_token().secret();
 
-    upsert_session(&user_info, &session_id, token_max_age, &state.db).await.unwrap();
+    upsert_session(&user_info, &session_id, token_max_age, &state.db)
+        .await
+        .unwrap();
 
     let session_cookie = Cookie::build(("sid", session_id.to_owned()))
         .domain(format!(".{}", state.domain))
@@ -78,7 +80,12 @@ pub async fn login(Extension(oauth_client): Extension<OpenIdClient>) -> impl Int
     )
 }
 
-async fn upsert_session(user: &UserInfo, session_id: &str, expires_at: DateTime<Utc>, db: &PgPool) -> Result<(), anyhow::Error> {
+async fn upsert_session(
+    user: &UserInfo,
+    session_id: &str,
+    expires_at: DateTime<Utc>,
+    db: &PgPool,
+) -> Result<(), anyhow::Error> {
     sqlx::query!(
         "INSERT INTO sessions (user_id, session_id, expires_at) VALUES (
                 (SELECT ID FROM users WHERE email = $1 LIMIT 1), $2, $3)

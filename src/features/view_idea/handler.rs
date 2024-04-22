@@ -1,7 +1,7 @@
 use axum::{
     extract::{Path, State},
-    response::IntoResponse,
     http::StatusCode,
+    response::IntoResponse,
 };
 use sqlx::{query_as, PgPool};
 use uuid::Uuid;
@@ -29,7 +29,11 @@ pub struct Idea {
 }
 
 #[tracing::instrument(name = "Get idea", skip(state))]
-pub async fn get_idea(State(state): State<AppState>, user: AppUser, Path(id): Path<String>) -> impl IntoResponse {
+pub async fn get_idea(
+    State(state): State<AppState>,
+    user: AppUser,
+    Path(id): Path<String>,
+) -> impl IntoResponse {
     let id = match Uuid::parse_str(&id) {
         Ok(id) => id,
         Err(e) => {
@@ -46,14 +50,19 @@ pub async fn get_idea(State(state): State<AppState>, user: AppUser, Path(id): Pa
 
 #[tracing::instrument(name = "Fetch idea from database", skip(db))]
 async fn fetch_idea(id: Uuid, user: &AppUser, db: &PgPool) -> Result<Idea, CreateIdeaError> {
-    query_as!(Idea, "SELECT title, tagline FROM ideas WHERE id = $1 AND user_id = $2", id, user.id)
-        .fetch_one(db)
-        .await
-        .map_err(|e| {
-            tracing::error!("Failed to execute query: {:?}", e);
-            match e {
-                sqlx::Error::RowNotFound => CreateIdeaError::Unauthorised,
-                _ => CreateIdeaError::SqlError,
-            }
-        })
+    query_as!(
+        Idea,
+        "SELECT title, tagline FROM ideas WHERE id = $1 AND user_id = $2",
+        id,
+        user.id
+    )
+    .fetch_one(db)
+    .await
+    .map_err(|e| {
+        tracing::error!("Failed to execute query: {:?}", e);
+        match e {
+            sqlx::Error::RowNotFound => CreateIdeaError::Unauthorised,
+            _ => CreateIdeaError::SqlError,
+        }
+    })
 }

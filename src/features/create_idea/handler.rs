@@ -9,7 +9,10 @@ use serde::Deserialize;
 use sqlx::{query, PgPool};
 use uuid::Uuid;
 
-use crate::{domain::{page::page, user::AppUser}, AppState};
+use crate::{
+    domain::{page::page, user::AppUser},
+    AppState,
+};
 
 use super::views::{error_form, new_idea_button, new_idea_form, new_idea_row};
 
