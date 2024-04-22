@@ -2,14 +2,14 @@ use chrono::Utc;
 use sqlx::types::Uuid;
 use sqlx::PgPool;
 
-use crate::helpers::{run_login, spawn_test_app};
+use crate::helpers::{create_user_session, spawn_test_app};
 
 #[tokio::test]
 async fn can_view_idea() {
     // Arrange
     let test_app = spawn_test_app().await;
 
-    run_login(&test_app).await;
+    create_user_session(&test_app).await;
     let idea_id = seed_idea(&test_app.db, "Test idea", "Just for testing").await;
 
     // Act

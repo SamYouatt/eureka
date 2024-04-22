@@ -137,7 +137,7 @@ pub async fn configure_open_id_mock(test_app: &TestApp) -> (MockGuard, MockGuard
 }
 
 // Creates a loggen in user with session cookie
-pub async fn run_login(test_app: &TestApp) {
+pub async fn create_user_session(test_app: &TestApp) {
     let _mock_open_id = configure_open_id_mock(test_app).await;
 
     let url = format!("{}/login/redirect?code=testauthcode", test_app.address);
