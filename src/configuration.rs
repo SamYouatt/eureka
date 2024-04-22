@@ -90,7 +90,7 @@ impl OpenIdSettings {
             auth_url,
             Some(token_url),
         )
-        .set_redirect_uri(RedirectUrl::new(redirect_url.into()).unwrap());
+        .set_redirect_uri(RedirectUrl::new(redirect_url).unwrap());
 
         OpenIdClient {
             client,

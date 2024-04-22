@@ -55,7 +55,7 @@ pub async fn login_callback(
 
     let session_id = auth_token.access_token().secret();
 
-    upsert_session(&user_info, &session_id, token_max_age, &state.db)
+    upsert_session(&user_info, session_id, token_max_age, &state.db)
         .await
         .unwrap();
 
