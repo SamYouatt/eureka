@@ -1,17 +1,16 @@
 {
   "db_name": "PostgreSQL",
-  "query": "INSERT INTO ideas (id, title, tagline, created_at) VALUES ($1, $2, $3, $4)",
+  "query": "INSERT INTO users (id, email, created_at) VALUES ($1, $2, $3) ON CONFLICT (email) DO NOTHING",
   "describe": {
     "columns": [],
     "parameters": {
       "Left": [
         "Uuid",
         "Text",
-        "Text",
         "Timestamptz"
       ]
     },
     "nullable": []
   },
-  "hash": "948ec9faf828573fcaf4f7833f72deee03cddc1efab0256e355b02a7c4ce889d"
+  "hash": "51a444dff97444105c040d280c978c739fef4606feb1eebd227a63ce4578e545"
 }
