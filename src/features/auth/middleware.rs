@@ -1,5 +1,5 @@
 use axum::{
-    extract::{FromRequest, FromRequestParts, Request, State},
+    extract::{FromRequestParts, Request, State},
     http::request::Parts,
     middleware::Next,
     response::{IntoResponse, Redirect},

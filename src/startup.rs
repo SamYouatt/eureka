@@ -8,7 +8,7 @@ use axum::{
     Extension, Router,
 };
 use axum_extra::extract::cookie::Key;
-use oauth2::basic::BasicClient;
+
 use reqwest::Client;
 use sqlx::{postgres::PgPoolOptions, PgPool};
 use tokio::net::TcpListener;
