@@ -131,10 +131,14 @@ pub async fn run(
         .route("/ideas/:id", get(get_idea))
         .route_layer(middleware::from_fn_with_state(state.clone(), require_session));
 
-    let app = Router::new()
+    let unprotected_router = Router::new()
         .route("/health_check", get(health_check))
         .route("/login", get(login))
-        .route("/login/redirect", get(login_callback))
+        .route("/login/redirect", get(login_callback));
+
+    let app = Router::new()
+        .merge(protected_router)
+        .merge(unprotected_router)
         .with_state(state)
         .nest_service(
             "/assets",
