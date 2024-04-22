@@ -17,6 +17,8 @@ pub struct ApplicationSettings {
     #[serde(deserialize_with = "deserialize_number_from_string")]
     pub port: u16,
     pub host: String,
+    pub domain: String,
+    pub https: bool,
 }
 
 #[derive(serde::Deserialize, Clone)]
@@ -70,14 +72,16 @@ pub struct OpenIdClient {
 }
 
 impl OpenIdSettings {
-    pub fn build_client(&self) -> OpenIdClient {
+    pub fn build_client(&self, settings: &Settings) -> OpenIdClient {
         let auth_url = AuthUrl::new(self.auth_url.to_owned())
             .expect("Invalid auth endpoint");
         let token_url = TokenUrl::new(self.token_url.to_owned())
             .expect("Invalid token endpoint");
 
-        // TODO: this should use the app configuration to generate the correct value
-        let redirect_url = "http://localhost:8000/login/redirect";
+        let redirect_url = match settings.application.https {
+            true => format!("https://{}/login/redirect", settings.application.domain),
+            false => format!("http://{}:{}/login/redirect", settings.application.domain, settings.application.port),
+        };
 
         let client = BasicClient::new(
             ClientId::new(self.client_id.expose_secret().into()),

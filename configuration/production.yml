@@ -1,5 +1,7 @@
 application:
   host: 0.0.0.0
   port: 8080
+  domain: "sam-y-eureka.fly.dev"
+  https: true
 database:
   require_ssl: false

@@ -1,5 +1,7 @@
 application:
   host: 127.0.0.1
+  domain: "localhost"
+  https: false
 database:
   require_ssl: false
 openid:
