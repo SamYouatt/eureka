@@ -1,3 +1,4 @@
+pub(crate) mod auth;
 pub(crate) mod create_idea;
 pub(crate) mod health_check;
 pub(crate) mod idea_list;

@@ -14,6 +14,8 @@ primary_region = 'lhr'
   # APP_DATABASE__PASSWORD should be a fly secret ONLY
   APP_DATABASE__PORT = "5432"
   APP_DATABASE__REQUIRE_SSL = "false"
+  # APP_OPENID__CLIENT_ID = fly secret
+  # APP_OPENID__CLIENT_SECRET = fly secret
 
 [build]
 

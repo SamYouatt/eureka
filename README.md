@@ -59,6 +59,12 @@ To do that:
 - Run `DATABASE_URL="postgres://postgres:password_from_bitwarden@localhost:54321/eureka" sqlx migrate run` to run the migrations
 - Should see a list of the applied migrations
 
+### Building the Docker image
+
+In order for the docker image to run and pass the sqlx checks, sqlx must have been prepared for offline evaluation.
+
+Before running any docker build commands run the following: `cargo sqlx preare -- --lib`
+
 ### App
 
 The app is hosted on fly by providing a docker file `Dockerfile` which will be built and deployed under the name `sam-y-eureka`.

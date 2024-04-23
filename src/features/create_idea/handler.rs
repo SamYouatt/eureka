@@ -9,7 +9,10 @@ use serde::Deserialize;
 use sqlx::{query, PgPool};
 use uuid::Uuid;
 
-use crate::{domain::page::page, AppState};
+use crate::{
+    domain::{page::page, user::AppUser},
+    AppState,
+};
 
 use super::views::{error_form, new_idea_button, new_idea_form, new_idea_row};
 
@@ -65,6 +68,7 @@ impl TryFrom<NewIdeaForm> for NewIdea {
 )]
 pub async fn create_idea(
     State(state): State<AppState>,
+    user: AppUser,
     Form(new_idea_form): Form<NewIdeaForm>,
 ) -> axum::response::Response {
     let new_idea = match NewIdea::try_from(new_idea_form.clone()) {
@@ -78,7 +82,7 @@ pub async fn create_idea(
         }
     };
 
-    match insert_idea(&state.db, &new_idea).await {
+    match insert_idea(&state.db, &new_idea, &user).await {
         Ok(idea_id) => {
             return new_idea_row(&new_idea, idea_id).into_response();
         }
@@ -87,15 +91,16 @@ pub async fn create_idea(
 }
 
 #[tracing::instrument(name = "Saving new idea to database", skip(db, idea))]
-async fn insert_idea(db: &PgPool, idea: &NewIdea) -> Result<Uuid, sqlx::Error> {
+async fn insert_idea(db: &PgPool, idea: &NewIdea, user: &AppUser) -> Result<Uuid, sqlx::Error> {
     let id = Uuid::new_v4();
 
     query!(
-        "INSERT INTO ideas (id, title, tagline, created_at) VALUES ($1, $2, $3, $4)",
+        "INSERT INTO ideas (id, title, tagline, created_at, user_id) VALUES ($1, $2, $3, $4, $5)",
         id,
         idea.name,
         idea.tagline,
-        Utc::now()
+        Utc::now(),
+        user.id,
     )
     .execute(db)
     .await

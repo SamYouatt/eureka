@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT title, tagline FROM ideas WHERE id = $1",
+  "query": "SELECT title, tagline FROM ideas WHERE id = $1 AND user_id = $2",
   "describe": {
     "columns": [
       {
@@ -16,6 +16,7 @@
     ],
     "parameters": {
       "Left": [
+        "Uuid",
         "Uuid"
       ]
     },
@@ -24,5 +25,5 @@
       false
     ]
   },
-  "hash": "fda240a1527a34922286aa3651cd24937fc5eb3ab2007467c023193a2a55338b"
+  "hash": "74b38d343e85bb4cc6464f2e8282d3c003a25a091b9564cea53e7af9709ec877"
 }

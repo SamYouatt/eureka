@@ -1,6 +1,4 @@
-use crate::startup::spawn_test_app;
-
-pub mod startup;
+use crate::helpers::spawn_test_app;
 
 #[tokio::test]
 async fn server_is_launched() {
