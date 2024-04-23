@@ -1,3 +1,3 @@
-pub(crate) mod handler;
+pub(crate) mod handle_login;
 pub(crate) mod middleware;
-pub(crate) mod views;
+pub(crate) mod get_login_page;

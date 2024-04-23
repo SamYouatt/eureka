@@ -1,8 +1,13 @@
+use axum::{response::IntoResponse, Extension};
 use maud::{html, Markup};
 
 use crate::configuration::OpenIdClient;
 
-pub fn login_button(open_id_client: &OpenIdClient) -> Markup {
+pub async fn handle_get_login(Extension(oauth_client): Extension<OpenIdClient>) -> impl IntoResponse {
+    login_button(&oauth_client)
+}
+
+fn login_button(open_id_client: &OpenIdClient) -> Markup {
     let url = format!(
         "{}?response_type=code&client_id={}&scope=openid%20email&redirect_uri={}",
         open_id_client.auth_url,
