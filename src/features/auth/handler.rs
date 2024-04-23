@@ -71,13 +71,7 @@ pub async fn login_callback(
 }
 
 pub async fn login(Extension(oauth_client): Extension<OpenIdClient>) -> impl IntoResponse {
-    login_button(
-        oauth_client.client.client_id(),
-        oauth_client
-            .client
-            .redirect_url()
-            .expect("Couldn't find redirect url"),
-    )
+    login_button(&oauth_client)
 }
 
 async fn upsert_session(

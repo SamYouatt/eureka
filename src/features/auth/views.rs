@@ -1,10 +1,17 @@
 use maud::{html, Markup};
 
-pub fn login_button(client_id: &str, redirect_uri: &str) -> Markup {
-    let endpoint = "https://accounts.google.com/o/oauth2/v2/auth";
+use crate::configuration::OpenIdClient;
+
+pub fn login_button(open_id_client: &OpenIdClient) -> Markup {
     let url = format!(
         "{}?response_type=code&client_id={}&scope=openid%20email&redirect_uri={}",
-        endpoint, client_id, redirect_uri
+        open_id_client.auth_url,
+        open_id_client.client.client_id().as_str(),
+        open_id_client
+            .client
+            .redirect_url()
+            .expect("Couldn't find open id client redirect")
+            .as_str()
     );
 
     html! {
