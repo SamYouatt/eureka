@@ -1,6 +1,5 @@
 use axum::{
-    extract::{FromRequestParts, Request, State},
-    http::request::Parts,
+    extract::{Request, State},
     middleware::Next,
     response::{IntoResponse, Redirect},
 };
@@ -9,44 +8,7 @@ use sqlx::PgPool;
 
 use crate::{domain::user::AppUser, AppState};
 
-pub enum AuthError {
-    NoSessionCookie,
-    NoMatchingUserForSession,
-    SqlError,
-}
-
-impl IntoResponse for AuthError {
-    fn into_response(self) -> axum::response::Response {
-        todo!()
-    }
-}
-
-// Extractor to get the app user
-// Will reject if the user is not already logged in
-#[axum::async_trait]
-impl FromRequestParts<AppState> for AppUser {
-    type Rejection = AuthError;
-
-    async fn from_request_parts(
-        parts: &mut Parts,
-        state: &AppState,
-    ) -> Result<Self, Self::Rejection> {
-        let cookie_jar: PrivateCookieJar = PrivateCookieJar::from_request_parts(parts, state)
-            .await
-            .unwrap();
-
-        let Some(session_cookie) = cookie_jar
-            .get("sid")
-            .map(|cookie| cookie.value().to_owned())
-        else {
-            return Err(AuthError::NoSessionCookie);
-        };
-
-        get_user_from_session(&session_cookie, &state.db)
-            .await?
-            .ok_or(AuthError::NoMatchingUserForSession)
-    }
-}
+use super::auth_error::AuthError;
 
 pub async fn require_session(
     State(state): State<AppState>,
@@ -82,7 +44,7 @@ pub async fn require_session(
     }
 }
 
-async fn get_user_from_session(
+pub async fn get_user_from_session(
     session_cookie: &str,
     db: &PgPool,
 ) -> Result<Option<AppUser>, AuthError> {
