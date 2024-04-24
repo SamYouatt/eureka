@@ -26,7 +26,8 @@ use crate::{
     configuration::{DatabaseSettings, OpenIdClient, Settings},
     features::{
         auth::{
-            get_login_page::handle_get_login, handle_login::login_callback, middleware::require_session
+            get_login_page::handle_get_login, handle_login::login_callback,
+            middleware::require_session,
         },
         create_idea::handler::{cancel_idea_form, create_idea, create_idea_page, get_idea_form},
         health_check::health_check,
