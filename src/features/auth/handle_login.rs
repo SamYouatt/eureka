@@ -13,8 +13,6 @@ use uuid::Uuid;
 
 use crate::{configuration::OpenIdClient, AppState};
 
-use super::views::login_button;
-
 const SESSION_MAX_AGE: i64 = 7 * 24 * 60 * 60; // 1 week
 
 #[derive(Deserialize, Debug)]
@@ -68,16 +66,6 @@ pub async fn login_callback(
         .build();
 
     (cookie_jar.add(session_cookie), Redirect::to("/"))
-}
-
-pub async fn login(Extension(oauth_client): Extension<OpenIdClient>) -> impl IntoResponse {
-    login_button(
-        oauth_client.client.client_id(),
-        oauth_client
-            .client
-            .redirect_url()
-            .expect("Couldn't find redirect url"),
-    )
 }
 
 async fn upsert_session(

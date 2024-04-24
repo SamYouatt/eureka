@@ -26,7 +26,7 @@ use crate::{
     configuration::{DatabaseSettings, OpenIdClient, Settings},
     features::{
         auth::{
-            handler::{login, login_callback},
+            get_login_page::handle_get_login, handle_login::login_callback,
             middleware::require_session,
         },
         create_idea::handler::{cancel_idea_form, create_idea, create_idea_page, get_idea_form},
@@ -146,7 +146,7 @@ pub async fn run(
 
     let unprotected_router = Router::new()
         .route("/health_check", get(health_check))
-        .route("/login", get(login))
+        .route("/login", get(handle_get_login))
         .route("/login/redirect", get(login_callback));
 
     let app = Router::new()
