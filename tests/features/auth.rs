@@ -2,7 +2,9 @@ use chrono::{DateTime, Duration, Utc};
 use sqlx::types::Uuid;
 use sqlx::PgPool;
 
-use crate::helpers::{assert_redirect_to, configure_open_id_mock, create_user_session, spawn_test_app};
+use crate::helpers::{
+    assert_redirect_to, configure_open_id_mock, create_user_session, spawn_test_app,
+};
 
 #[tokio::test]
 async fn oauth_callback_attaches_cookie() {

@@ -75,7 +75,7 @@ pub async fn verify_session(session_cookie: &str, db: &PgPool) -> Result<(), Aut
             if expires_at.expires_at < Utc::now() {
                 return Err(AuthError::ExpiredSession);
             }
-            return Ok(());
+            Ok(())
         }
         Ok(None) => Err(AuthError::NoSessionStored),
         Err(e) => {
