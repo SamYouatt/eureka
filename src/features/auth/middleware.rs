@@ -6,6 +6,7 @@ use axum::{
 use axum_extra::extract::{cookie::Cookie, PrivateCookieJar};
 use chrono::Utc;
 use sqlx::PgPool;
+use time::Duration;
 
 use crate::{domain::user::AppUser, AppState};
 
@@ -33,9 +34,16 @@ pub async fn require_session(
     if let Err(e) = verify_session(&session_cookie, &state.db).await {
         match e {
             AuthError::ExpiredSession => {
-                let _ = cookie_jar.remove(Cookie::from("sid"));
-                return redirect_to_login();
-            },
+                let session_cookie = Cookie::build(("sid", "EXPIRED"))
+                    .domain(format!(".{}", state.domain))
+                    .path("/")
+                    .secure(true)
+                    .http_only(true)
+                    .max_age(Duration::days(-1))
+                    .build();
+
+                return (cookie_jar.add(session_cookie), Redirect::to("/login")).into_response();
+            }
             _ => return redirect_to_login(),
         };
     };
