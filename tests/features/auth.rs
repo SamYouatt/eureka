@@ -1,8 +1,10 @@
-use chrono::Utc;
+use chrono::{DateTime, Duration, Utc};
 use sqlx::types::Uuid;
 use sqlx::PgPool;
 
-use crate::helpers::{assert_redirect_to, configure_open_id_mock, spawn_test_app};
+use crate::helpers::{
+    assert_redirect_to, configure_open_id_mock, create_user_session, spawn_test_app,
+};
 
 #[tokio::test]
 async fn oauth_callback_attaches_cookie() {
@@ -22,6 +24,9 @@ async fn oauth_callback_attaches_cookie() {
         .send()
         .await
         .expect("Failed to execute request");
+
+    let cookie = response.cookies().find(|cookie| cookie.name() == "sid");
+    println!("{:?}", cookie);
 
     // Assert
     assert_eq!(response.status().as_u16(), 303);
@@ -131,6 +136,29 @@ async fn without_session_should_redircect_to_login() {
     assert_redirect_to(&response, "/login");
 }
 
+#[tokio::test]
+async fn expired_session_should_redirect_to_login() {
+    // Arrange
+    let test_app = spawn_test_app().await;
+    let user_id = create_user_session("test@test.com", &test_app).await;
+    let session_id = find_user_session(&test_app.db, user_id).await;
+
+    let expired_token_age = Utc::now() - Duration::hours(2);
+    expire_session(&test_app.db, &session_id, expired_token_age).await;
+
+    // Act
+    let url = format!("{}/", test_app.address);
+    let response = test_app
+        .client
+        .get(url)
+        .send()
+        .await
+        .expect("Failed to execute request");
+
+    // Assert
+    assert_redirect_to(&response, "/login");
+}
+
 async fn seed_user(db: &PgPool, email: &str) -> Uuid {
     let user_id = Uuid::new_v4();
 
@@ -145,4 +173,26 @@ async fn seed_user(db: &PgPool, email: &str) -> Uuid {
     .unwrap();
 
     user_id
+}
+
+async fn find_user_session(db: &PgPool, user_id: Uuid) -> String {
+    sqlx::query!(
+        "SELECT session_id FROM sessions WHERE user_id = $1 LIMIT 1",
+        user_id,
+    )
+    .fetch_one(db)
+    .await
+    .unwrap()
+    .session_id
+}
+
+async fn expire_session(db: &PgPool, session_id: &str, expires_at: DateTime<Utc>) {
+    sqlx::query!(
+        "UPDATE sessions SET expires_at = $1 WHERE session_id = $2",
+        expires_at,
+        session_id,
+    )
+    .execute(db)
+    .await
+    .unwrap();
 }
