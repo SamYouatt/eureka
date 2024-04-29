@@ -28,11 +28,7 @@ use crate::{
         auth::{
             get_login_page::handle_get_login, handle_login::login_callback,
             middleware::require_session,
-        },
-        create_idea::handler::{cancel_idea_form, create_idea, create_idea_page, get_idea_form},
-        health_check::health_check,
-        idea_list::handler::get_ideas,
-        view_idea::handler::get_idea,
+        }, create_idea::handler::{cancel_idea_form, create_idea, create_idea_page, get_idea_form}, create_story::handle_create_story, health_check::health_check, idea_list::handler::get_ideas, view_idea::handler::get_idea
     },
     AppState,
 };
@@ -139,6 +135,7 @@ pub async fn run(
         .route("/ideas/new/form", get(get_idea_form))
         .route("/ideas/new/cancel", post(cancel_idea_form))
         .route("/ideas/:id", get(get_idea))
+        .route("/:idea_id/story", post(handle_create_story))
         .route_layer(middleware::from_fn_with_state(
             state.clone(),
             require_session,

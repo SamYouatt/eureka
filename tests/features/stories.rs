@@ -56,7 +56,7 @@ async fn seed_idea(db: &PgPool, user_id: Uuid) -> Uuid {
 }
 
 async fn assert_story_written(story: &str, body: &str, db: &PgPool) {
-    let mathed_stories = sqlx::query!("SELECT COUNT(*) FROM stories WHERE story = $1 AND body = $2", story, body)
+    let matched_stories = sqlx::query!("SELECT COUNT(*) FROM stories WHERE story = $1 AND body = $2", story, body)
         .fetch_one(db)
         .await
         .expect("Failed to find saved story");
