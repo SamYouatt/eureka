@@ -12,7 +12,7 @@ async fn can_create_story() {
     let idea_id = seed_idea(&test_app.db, user_id).await;
 
     // Act
-    let body = "story=Test%20Story&body=Story%20should%20be%20good%20test";
+    let body = "story=Test%20Story";
 
     let url = format!("{}/{}/story", test_app.address, idea_id);
     let response = test_app
@@ -27,11 +27,10 @@ async fn can_create_story() {
     // Assert
     assert!(response.status().is_success());
 
-    assert_story_written("Test story", "Story should be good test", &test_app.db).await;
+    assert_story_written("Test story", &test_app.db).await;
 
     let response_body = response.text().await.unwrap();
     assert_eq!(1, response_body.match_indices("Test Story").count());
-    assert_eq!(1, response_body.match_indices("Story should be good test").count());
 }
 
 #[tokio::test]
@@ -55,8 +54,8 @@ async fn seed_idea(db: &PgPool, user_id: Uuid) -> Uuid {
     idea_id
 }
 
-async fn assert_story_written(story: &str, body: &str, db: &PgPool) {
-    let matched_stories = sqlx::query!("SELECT COUNT(*) FROM stories WHERE story = $1 AND body = $2", story, body)
+async fn assert_story_written(story: &str, db: &PgPool) {
+    let matched_stories = sqlx::query!("SELECT COUNT(*) FROM stories WHERE story = $1", story)
         .fetch_one(db)
         .await
         .expect("Failed to find saved story");
